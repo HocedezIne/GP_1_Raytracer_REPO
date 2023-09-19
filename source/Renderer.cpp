@@ -27,7 +27,6 @@ void Renderer::Render(Scene* pScene) const
 	auto& materials = pScene->GetMaterials();
 	auto& lights = pScene->GetLights();
 
-	// todo calc aspect ratio
 	float aspectRatio = m_Width / static_cast<float>(m_Height);
 
 	for (int px{}; px < m_Width; ++px)
@@ -42,7 +41,16 @@ void Renderer::Render(Scene* pScene) const
 			rayDirection.Normalize();
 			Ray hitRay{ Vector3{0,0,0}, rayDirection };
 
-			ColorRGB finalColor{rayDirection.x, rayDirection.y, rayDirection.z};
+			// updated to test sphere hit test
+			ColorRGB finalColor{};
+			HitRecord closestHit{};
+			Sphere testSphere{ {0.f,0.f,100.f}, 50.f, 0 };
+
+			GeometryUtils::HitTest_Sphere(testSphere, hitRay, closestHit);
+			if (closestHit.didHit)
+			{
+				finalColor = materials[closestHit.materialIndex]->Shade();
+			}
 
 			//Update Color in Buffer
 			finalColor.MaxToOne();
