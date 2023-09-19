@@ -48,18 +48,6 @@ int main(int argc, char* args[])
 	const auto pScene = new Scene_W1();
 	pScene->Initialize();
 
-	//Test Dot/Cross Vector3
-	Vector3 v1{ 1,2,3 };
-	Vector3 v2{ 2,4,6 };
-	float dot3{ Vector3::Dot(v1, v2) };
-	Vector3 cross3{ Vector3::Cross(v1, v2) };
-	std::cout << "Breakpoint to check Vector3 dot and cross product\n";
-	//Test Dot Vector4
-	Vector4 v3{ 1,2,3,4 };
-	Vector4 v4{ 0,2,4,6 };
-	float dot4{ Vector4::Dot(v3,v4) };
-	std::cout << "Breakpoint to check Vector4 dot product\n";
-
 	//Start loop
 	pTimer->Start();
 

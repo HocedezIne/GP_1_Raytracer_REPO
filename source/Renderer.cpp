@@ -27,15 +27,22 @@ void Renderer::Render(Scene* pScene) const
 	auto& materials = pScene->GetMaterials();
 	auto& lights = pScene->GetLights();
 
+	// todo calc aspect ratio
+	float aspectRatio = m_Width / static_cast<float>(m_Height);
+
 	for (int px{}; px < m_Width; ++px)
 	{
+		float xValue{ (2.f * (float(px) + 0.5f) / m_Width - 1.f) * aspectRatio };
+
 		for (int py{}; py < m_Height; ++py)
 		{
-			float gradient = px / static_cast<float>(m_Width);
-			gradient += py / static_cast<float>(m_Width);
-			gradient /= 2.0f;
+			float yValue{ 1.f - 2.f * (float(py) + 0.5f) / m_Height };
 
-			ColorRGB finalColor{ gradient, gradient, gradient };
+			Vector3 rayDirection{ xValue, yValue, 1.f};
+			rayDirection.Normalize();
+			Ray hitRay{ Vector3{0,0,0}, rayDirection };
+
+			ColorRGB finalColor{rayDirection.x, rayDirection.y, rayDirection.z};
 
 			//Update Color in Buffer
 			finalColor.MaxToOne();
