@@ -40,6 +40,17 @@ namespace dae {
 				smallestT = hit.t;
 			}
 		}
+
+		/*for (const Plane& plane : m_PlaneGeometries)
+		{
+			HitRecord hit{};
+			GeometryUtils::HitTest_Plane(plane, ray, hit);
+			if (hit.t < smallestT)
+			{
+				closestHit = hit;
+				smallestT = hit.t;
+			}
+		}*/
 	}
 
 	bool Scene::DoesHit(const Ray& ray) const

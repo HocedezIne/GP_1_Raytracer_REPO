@@ -45,7 +45,9 @@ void Renderer::Render(Scene* pScene) const
 			ColorRGB finalColor{};
 			HitRecord closestHit{};
 
-			pScene->GetClosestHit(hitRay, closestHit);
+			Plane testPlane{ {0.f, -50.f,0.f}, {0.f,1.f,0.f}, 0 };
+			GeometryUtils::HitTest_Plane(testPlane, hitRay, closestHit);
+			//pScene->GetClosestHit(hitRay, closestHit);
 			if (closestHit.didHit)
 			{
 				finalColor = materials[closestHit.materialIndex]->Shade();

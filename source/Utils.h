@@ -14,24 +14,6 @@ namespace dae
 		{
 			if (ignoreHitRecord) return false;
 
-			/*float aTerm{ Vector3::Dot(ray.direction, ray.direction) };
-			float bTerm{ Vector3::Dot(ray.direction * 2, ray.origin - sphere.origin) };
-			float cTerm{ Vector3::Dot(ray.origin - sphere.origin, ray.origin - sphere.origin) - powf(sphere.radius, 2) };
-
-			float discriminant{ powf(bTerm,2) - 4 * aTerm * cTerm };
-
-			if (discriminant < 0) return false;
-			hitRecord.didHit = true;
-			hitRecord.materialIndex = sphere.materialIndex;
-			if (discriminant == 0)
-			{
-				hitRecord.t = -bTerm / (2 * aTerm);
-			}
-			if (discriminant > 0)
-			{
-				hitRecord.t = (-bTerm - discriminant) / (2 * aTerm);
-			}
-			return true;*/
 			const Vector3 originLine{ sphere.origin - ray.origin };
 			const Vector3 dp{ Vector3::Dot(originLine, ray.direction) * ray.direction };
 			const float od{ (sphere.origin - dp).Magnitude() };
@@ -45,6 +27,8 @@ namespace dae
 				hitRecord.t = Vector3::Dot(originLine, ray.direction) - tHC;
 				return true;
 			}
+
+			return false;
 		}
 
 		inline bool HitTest_Sphere(const Sphere& sphere, const Ray& ray)
@@ -57,8 +41,19 @@ namespace dae
 		//PLANE HIT-TESTS
 		inline bool HitTest_Plane(const Plane& plane, const Ray& ray, HitRecord& hitRecord, bool ignoreHitRecord = false)
 		{
-			//todo W1
-			assert(false && "No Implemented Yet!");
+			if (ignoreHitRecord) return false;
+
+			const Vector3 originLine{ plane.origin - ray.origin };
+			const float t = Vector3::Dot(originLine, plane.normal) / Vector3::Dot(ray.direction, plane.normal);
+
+			if (t > ray.min && t < ray.max)
+			{
+				hitRecord.didHit = true;
+				hitRecord.materialIndex = plane.materialIndex;
+				hitRecord.t = t;
+				return true;
+			}
+
 			return false;
 		}
 
