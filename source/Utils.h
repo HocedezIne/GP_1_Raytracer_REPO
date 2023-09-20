@@ -12,19 +12,39 @@ namespace dae
 		//SPHERE HIT-TESTS
 		inline bool HitTest_Sphere(const Sphere& sphere, const Ray& ray, HitRecord& hitRecord, bool ignoreHitRecord = false)
 		{
-			float aTerm{ Vector3::Dot(ray.direction, ray.direction) };
+			if (ignoreHitRecord) return false;
+
+			/*float aTerm{ Vector3::Dot(ray.direction, ray.direction) };
 			float bTerm{ Vector3::Dot(ray.direction * 2, ray.origin - sphere.origin) };
 			float cTerm{ Vector3::Dot(ray.origin - sphere.origin, ray.origin - sphere.origin) - powf(sphere.radius, 2) };
 
 			float discriminant{ powf(bTerm,2) - 4 * aTerm * cTerm };
 
+			if (discriminant < 0) return false;
+			hitRecord.didHit = true;
+			hitRecord.materialIndex = sphere.materialIndex;
+			if (discriminant == 0)
+			{
+				hitRecord.t = -bTerm / (2 * aTerm);
+			}
 			if (discriminant > 0)
 			{
+				hitRecord.t = (-bTerm - discriminant) / (2 * aTerm);
+			}
+			return true;*/
+			const Vector3 originLine{ sphere.origin - ray.origin };
+			const Vector3 dp{ Vector3::Dot(originLine, ray.direction) * ray.direction };
+			const float od{ (sphere.origin - dp).Magnitude() };
+
+			if (od <= sphere.radius)
+			{
+				const float tHC{ sqrtf(sphere.radius * sphere.radius - od * od) };
+
 				hitRecord.didHit = true;
 				hitRecord.materialIndex = sphere.materialIndex;
+				hitRecord.t = Vector3::Dot(originLine, ray.direction) - tHC;
 				return true;
 			}
-			return false;
 		}
 
 		inline bool HitTest_Sphere(const Sphere& sphere, const Ray& ray)
