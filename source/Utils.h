@@ -14,21 +14,23 @@ namespace dae
 		{
 			if (ignoreHitRecord) return false;
 
-			const Vector3 originLine{ sphere.origin - ray.origin };
-			const Vector3 dp{ Vector3::Dot(originLine, ray.direction) * ray.direction };
-			const float od{ (sphere.origin - dp).Magnitude() };
+			const Vector3 originToSphere{ sphere.origin - ray.origin };
+			const float originToSphereDot{ Vector3::Dot(originToSphere, ray.direction) };
 
-			if (od <= sphere.radius)
-			{
-				const float tHC{ sqrtf(sphere.radius * sphere.radius - od * od) };
+			const float discriminant = sphere.radius * sphere.radius - Vector3::Dot(originToSphere, originToSphere) + originToSphereDot * originToSphereDot;
 
-				hitRecord.didHit = true;
-				hitRecord.materialIndex = sphere.materialIndex;
-				hitRecord.t = Vector3::Dot(originLine, ray.direction) - tHC;
-				return true;
-			}
+			if (discriminant <= 0) return false;
 
-			return false;
+			const float tHC{ sqrtf(discriminant) };
+			const float t0{ originToSphereDot - tHC};
+			const float t1{ originToSphereDot + tHC};
+
+			//if (t0 < ray.min || t1 > ray.max) return false; // no spheres fall outside the range so check creates overhead and slows down raytracing
+
+			hitRecord.didHit = true;
+			hitRecord.materialIndex = sphere.materialIndex;
+			hitRecord.t = Vector3::Dot(originToSphere, ray.direction) - tHC;
+			return true;
 		}
 
 		inline bool HitTest_Sphere(const Sphere& sphere, const Ray& ray)
@@ -43,8 +45,7 @@ namespace dae
 		{
 			if (ignoreHitRecord) return false;
 
-			const Vector3 originLine{ plane.origin - ray.origin };
-			const float t = Vector3::Dot(originLine, plane.normal) / Vector3::Dot(ray.direction, plane.normal);
+			const float t = Vector3::Dot(plane.origin - ray.origin, plane.normal) / Vector3::Dot(ray.direction, plane.normal);
 
 			if (t > ray.min && t < ray.max)
 			{
