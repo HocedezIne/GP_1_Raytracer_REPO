@@ -22,14 +22,14 @@ namespace dae
 			if (discriminant <= 0) return false;
 
 			const float tHC{ sqrtf(discriminant) };
-			const float t0{ originToSphereDot - tHC};
-			const float t1{ originToSphereDot + tHC};
 
+			//const float t0{ originToSphereDot - tHC};
+			//const float t1{ originToSphereDot + tHC};
 			//if (t0 < ray.min || t1 > ray.max) return false; // no spheres fall outside the range so check creates overhead and slows down raytracing
 
 			hitRecord.didHit = true;
 			hitRecord.materialIndex = sphere.materialIndex;
-			hitRecord.t = Vector3::Dot(originToSphere, ray.direction) - tHC;
+			hitRecord.t = originToSphereDot - tHC;
 			return true;
 		}
 
