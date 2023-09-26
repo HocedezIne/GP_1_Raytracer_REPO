@@ -39,7 +39,7 @@ void Renderer::Render(Scene* pScene) const
 
 			Vector3 rayDirection{ xValue, yValue, 1.f};
 			rayDirection.Normalize();
-			Ray hitRay{ Vector3{0,0,0}, rayDirection };
+			Ray hitRay{ camera.origin, rayDirection };
 
 			// updated to test sphere hit test
 			ColorRGB finalColor{};
