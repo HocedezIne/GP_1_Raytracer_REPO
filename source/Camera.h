@@ -22,13 +22,15 @@ namespace dae
 		Vector3 origin{};
 		float fovAngle{90.f};
 
-		//Vector3 forward{Vector3::UnitZ};
-		Vector3 forward{0.266f,-0.453f, 0.860f};
+		Vector3 forward{Vector3::UnitZ};
+		//Vector3 forward{0.266f,-0.453f, 0.860f};
 		Vector3 up{Vector3::UnitY};
 		Vector3 right{Vector3::UnitX};
 
 		float totalPitch{0.f};
 		float totalYaw{0.f};
+
+		const float movementSpeed{ 10.f };
 
 		Matrix cameraToWorld{};
 
@@ -55,8 +57,26 @@ namespace dae
 			int mouseX{}, mouseY{};
 			const uint32_t mouseState = SDL_GetRelativeMouseState(&mouseX, &mouseY);
 
-			//todo: W2
-			//assert(false && "Not Implemented Yet");
+			// Movement
+			if (pKeyboardState[SDL_SCANCODE_W])
+			{
+				origin.z += movementSpeed * deltaTime;
+			}
+			if (pKeyboardState[SDL_SCANCODE_S])
+			{
+				origin.z -= movementSpeed * deltaTime;
+			}
+			if (pKeyboardState[SDL_SCANCODE_D])
+			{
+				origin.x += movementSpeed * deltaTime;
+			}
+			if (pKeyboardState[SDL_SCANCODE_A])
+			{
+				origin.x -= movementSpeed * deltaTime;
+			}
+
+			// Rotation
+
 		}
 	};
 }
