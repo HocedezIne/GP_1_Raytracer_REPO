@@ -104,9 +104,12 @@ namespace dae {
 
 	Matrix Matrix::CreateTranslation(float x, float y, float z)
 	{
-		//todo W2
-		assert(false && "Not Implemented Yet");
-		return {};
+		Matrix out{};
+		out.data[0] = { 1.f,0.f,0.f,0.f };
+		out.data[1] = { 0.f,1.f,0.f,0.f };
+		out.data[2] = { 0.f,0.f,1.f,0.f };
+		out.data[3] = { x,y,z,1.f };
+		return out;
 	}
 
 	Matrix Matrix::CreateTranslation(const Vector3& t)
@@ -116,30 +119,49 @@ namespace dae {
 
 	Matrix Matrix::CreateRotationX(float pitch)
 	{
-		//todo W2
-		assert(false && "Not Implemented Yet");
-		return {};
+		Matrix out{};
+		const float sinp{ sinf(pitch) };
+		const float cosp{ cosf(pitch) };
+		//TODO check if right
+		out.data[0] = {1.f, 0.f, 0.f, 0.f};
+		out.data[1] = {0.f, cosp, sinp, 0.f};
+		out.data[2] = {0.f, -sinp, cosp, 0.f};
+		out.data[3] = {0.f, 0.f, 0.f, 1.f};
+		return out;
 	}
 
 	Matrix Matrix::CreateRotationY(float yaw)
 	{
-		//todo W2
-		assert(false && "Not Implemented Yet");
-		return {};
+		Matrix out{};
+		const float sinp{ sinf(yaw) };
+		const float cosp{ cosf(yaw) };
+		//TODO check if right
+		out.data[0] = { cosp, 0.f, -sinp, 0.f };
+		out.data[1] = { 0.f, 1, 0, 0.f };
+		out.data[2] = { sinp, 0, cosp, 0.f };
+		out.data[3] = { 0.f, 0.f, 0.f, 1.f };
+		return out;
 	}
 
 	Matrix Matrix::CreateRotationZ(float roll)
 	{
-		//todo W2
-		assert(false && "Not Implemented Yet");
-		return {};
+		Matrix out{};
+		const float sinp{ sinf(roll) };
+		const float cosp{ cosf(roll) };
+		//TODO check if right
+		out.data[0] = { cosp, sinp, 0.f, 1.f };
+		out.data[1] = { -sinp, cosp, 0.f, 0.f };
+		out.data[2] = { 0.f, 0.f, 1.f, 0.f };
+		out.data[3] = { 0.f, 0.f, 0.f, 1.f };
+		return out;
 	}
 
 	Matrix Matrix::CreateRotation(const Vector3& r)
 	{
 		//todo W2
-		assert(false && "Not Implemented Yet");
-		return {};
+		//assert(false && "Not Implemented Yet");
+
+		return {CreateRotationX(r[0]) * CreateRotationY(r[1]) * CreateRotationZ(r[2])};
 	}
 
 	Matrix Matrix::CreateRotation(float pitch, float yaw, float roll)
@@ -149,9 +171,12 @@ namespace dae {
 
 	Matrix Matrix::CreateScale(float sx, float sy, float sz)
 	{
-		//todo W2
-		assert(false && "Not Implemented Yet");
-		return {};
+		Matrix out{};
+		out.data[0] = { sx,0.f,0.f,0.f };
+		out.data[1] = { 0.f,sy,0.f,0.f };
+		out.data[2] = { 0.f,0.f,sz,0.f };
+		out.data[3] = {0.f,0.f,0.f,1.f};
+		return out;
 	}
 
 	Matrix Matrix::CreateScale(const Vector3& s)
