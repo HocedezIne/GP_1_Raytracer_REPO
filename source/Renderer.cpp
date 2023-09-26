@@ -40,7 +40,9 @@ void Renderer::Render(Scene* pScene) const
 			float yValue{ (1.f - 2.f * (float(py) + 0.5f) / m_Height) * FOV };
 
 			Vector3 rayDirection{ xValue, yValue, 1.f};
+			rayDirection = camera.CalculateCameraToWorld().TransformVector(rayDirection);
 			rayDirection.Normalize();
+
 			Ray hitRay{ camera.origin, rayDirection };
 
 			// updated to test sphere hit test

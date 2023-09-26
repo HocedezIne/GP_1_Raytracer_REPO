@@ -39,8 +39,7 @@ namespace dae
 			up = Vector3::Cross(forward, right);
 			up.Normalize();
 
-			Matrix out{ right, up, forward, origin };
-			return out;
+			return { right, up, forward, origin };
 		}
 
 		void Update(Timer* pTimer)
