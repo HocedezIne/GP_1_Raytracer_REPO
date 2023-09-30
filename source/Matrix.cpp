@@ -122,7 +122,7 @@ namespace dae {
 		Matrix out{};
 		const float sinp{ sinf(pitch) };
 		const float cosp{ cosf(pitch) };
-		//TODO check if right
+
 		out.data[0] = {1.f, 0.f, 0.f, 0.f};
 		out.data[1] = {0.f, cosp, sinp, 0.f};
 		out.data[2] = {0.f, -sinp, cosp, 0.f};
@@ -135,7 +135,7 @@ namespace dae {
 		Matrix out{};
 		const float sinp{ sinf(yaw) };
 		const float cosp{ cosf(yaw) };
-		//TODO check if right
+		
 		out.data[0] = { cosp, 0.f, -sinp, 0.f };
 		out.data[1] = { 0.f, 1, 0, 0.f };
 		out.data[2] = { sinp, 0, cosp, 0.f };
@@ -148,7 +148,7 @@ namespace dae {
 		Matrix out{};
 		const float sinp{ sinf(roll) };
 		const float cosp{ cosf(roll) };
-		//TODO check if right
+		
 		out.data[0] = { cosp, sinp, 0.f, 1.f };
 		out.data[1] = { -sinp, cosp, 0.f, 0.f };
 		out.data[2] = { 0.f, 0.f, 1.f, 0.f };
@@ -158,9 +158,6 @@ namespace dae {
 
 	Matrix Matrix::CreateRotation(const Vector3& r)
 	{
-		//todo W2
-		//assert(false && "Not Implemented Yet");
-
 		return {CreateRotationX(r[0]) * CreateRotationY(r[1]) * CreateRotationZ(r[2])};
 	}
 

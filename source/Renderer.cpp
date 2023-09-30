@@ -27,9 +27,8 @@ void Renderer::Render(Scene* pScene) const
 	auto& materials = pScene->GetMaterials();
 	auto& lights = pScene->GetLights();
 
-	//TODO check if best place to calc FOV
 	const float aspectRatio = m_Width / static_cast<float>(m_Height);
-	const float FOV = tanf(camera.fovAngle / 2);
+	const float FOV = tanf((camera.fovAngle*TO_RADIANS) / 2);
 
 	for (int px{}; px < m_Width; ++px)
 	{
@@ -45,7 +44,6 @@ void Renderer::Render(Scene* pScene) const
 
 			Ray hitRay{ camera.origin, rayDirection };
 
-			// updated to test sphere hit test
 			ColorRGB finalColor{};
 			HitRecord closestHit{};
 

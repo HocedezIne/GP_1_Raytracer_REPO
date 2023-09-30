@@ -23,9 +23,9 @@ namespace dae
 
 			const float tHC{ sqrtf(discriminant) };
 
-			//const float t0{ originToSphereDot - tHC};
-			//const float t1{ originToSphereDot + tHC};
-			//if (t0 < ray.min || t1 > ray.max) return false; // no spheres fall outside the range so check creates overhead and slows down raytracing
+			const float t0{ originToSphereDot - tHC};
+			const float t1{ originToSphereDot + tHC};
+			if (t0 < ray.min || t1 > ray.max) return false; // no spheres fall outside the range so check creates overhead and slows down raytracing
 
 			hitRecord.didHit = true;
 			hitRecord.materialIndex = sphere.materialIndex;
