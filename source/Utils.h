@@ -29,7 +29,10 @@ namespace dae
 
 			hitRecord.didHit = true;
 			hitRecord.materialIndex = sphere.materialIndex;
-			hitRecord.t = originToSphereDot - tHC;
+			hitRecord.t = t0;
+			hitRecord.origin = ray.origin + t0 * ray.direction;
+			hitRecord.normal = hitRecord.origin - sphere.origin;
+			hitRecord.normal.Normalize();
 			return true;
 		}
 
@@ -52,6 +55,8 @@ namespace dae
 				hitRecord.didHit = true;
 				hitRecord.materialIndex = plane.materialIndex;
 				hitRecord.t = t;
+				hitRecord.origin = ray.origin + t * ray.direction;
+				hitRecord.normal = plane.normal;
 				return true;
 			}
 
@@ -100,8 +105,7 @@ namespace dae
 		//Direction from target to light
 		inline Vector3 GetDirectionToLight(const Light& light, const Vector3 origin)
 		{
-			//todo W3
-			assert(false && "No Implemented Yet!");
+			if (light.type != LightType::Directional) return { light.origin - origin };
 			return {};
 		}
 
