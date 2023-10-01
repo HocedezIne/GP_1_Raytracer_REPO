@@ -27,21 +27,23 @@ void Renderer::Render(Scene* pScene) const
 	auto& materials = pScene->GetMaterials();
 	auto& lights = pScene->GetLights();
 
-	float aspectRatio = m_Width / static_cast<float>(m_Height);
+	const float aspectRatio = m_Width / static_cast<float>(m_Height);
+	const float FOV = tanf((camera.fovAngle*TO_RADIANS) / 2);
 
 	for (int px{}; px < m_Width; ++px)
 	{
-		float xValue{ (2.f * (float(px) + 0.5f) / m_Width - 1.f) * aspectRatio };
+		float xValue{ (2.f * (float(px) + 0.5f) / m_Width - 1.f) * aspectRatio * FOV };
 
 		for (int py{}; py < m_Height; ++py)
 		{
-			float yValue{ 1.f - 2.f * (float(py) + 0.5f) / m_Height };
+			float yValue{ (1.f - 2.f * (float(py) + 0.5f) / m_Height) * FOV };
 
 			Vector3 rayDirection{ xValue, yValue, 1.f};
+			rayDirection = camera.CalculateCameraToWorld().TransformVector(rayDirection);
 			rayDirection.Normalize();
-			Ray hitRay{ Vector3{0,0,0}, rayDirection };
 
-			// updated to test sphere hit test
+			Ray hitRay{ camera.origin, rayDirection };
+
 			ColorRGB finalColor{};
 			HitRecord closestHit{};
 
@@ -49,6 +51,19 @@ void Renderer::Render(Scene* pScene) const
 			if (closestHit.didHit)
 			{
 				finalColor = materials[closestHit.materialIndex]->Shade();
+
+				for (Light light : lights)
+				{
+					Ray rayToLight{ closestHit.origin, LightUtils::GetDirectionToLight(light, closestHit.origin) };
+					rayToLight.origin += closestHit.normal * 0.001f;
+					rayToLight.max = rayToLight.direction.Magnitude();
+					rayToLight.direction.Normalize();
+
+					if (pScene->DoesHit(rayToLight))
+					{
+						finalColor *= 0.5f;
+					}
+				}
 			}
 
 			//Update Color in Buffer

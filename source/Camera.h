@@ -29,14 +29,24 @@ namespace dae
 		float totalPitch{0.f};
 		float totalYaw{0.f};
 
+		const float movementSpeed{ 10.f };
+		bool updateONB{ true };
+
 		Matrix cameraToWorld{};
 
 
 		Matrix CalculateCameraToWorld()
 		{
-			//todo: W2
-			assert(false && "Not Implemented Yet");
-			return {};
+			if (updateONB)
+			{
+				right = Vector3::Cross(Vector3::UnitY, forward);
+				right.Normalize();
+				up = Vector3::Cross(forward, right);
+				up.Normalize();
+			}
+			updateONB = false;
+
+			return { right, up, forward, origin };
 		}
 
 		void Update(Timer* pTimer)
@@ -51,8 +61,40 @@ namespace dae
 			int mouseX{}, mouseY{};
 			const uint32_t mouseState = SDL_GetRelativeMouseState(&mouseX, &mouseY);
 
-			//todo: W2
-			//assert(false && "Not Implemented Yet");
+			// Movement
+			if (pKeyboardState[SDL_SCANCODE_W])
+			{
+				origin.z += movementSpeed * deltaTime;
+				updateONB = true;
+			}
+			if (pKeyboardState[SDL_SCANCODE_S])
+			{
+				origin.z -= movementSpeed * deltaTime;
+				updateONB = true;
+			}
+			if (pKeyboardState[SDL_SCANCODE_D])
+			{
+				origin.x += movementSpeed * deltaTime;
+				updateONB = true;
+			}
+			if (pKeyboardState[SDL_SCANCODE_A])
+			{
+				origin.x -= movementSpeed * deltaTime;
+				updateONB = true;
+			}
+
+			// Rotation
+			if (mouseState & SDL_BUTTON(SDL_BUTTON_LEFT))
+			{
+				const float totalYaw { (mouseX * deltaTime) / 2 };
+				const float totalPitch {(mouseY * deltaTime) / 2};
+
+				Matrix rotation = Matrix::CreateRotation(totalPitch, totalYaw, 0);
+				forward = rotation.TransformVector(forward);
+				forward.Normalize();
+
+				updateONB = true;
+			}
 		}
 	};
 }

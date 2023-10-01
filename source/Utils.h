@@ -22,14 +22,17 @@ namespace dae
 			if (discriminant <= 0) return false;
 
 			const float tHC{ sqrtf(discriminant) };
+
 			const float t0{ originToSphereDot - tHC};
 			const float t1{ originToSphereDot + tHC};
-
-			//if (t0 < ray.min || t1 > ray.max) return false; // no spheres fall outside the range so check creates overhead and slows down raytracing
+			if (t0 < ray.min || t1 > ray.max) return false; // no spheres fall outside the range so check creates overhead and slows down raytracing
 
 			hitRecord.didHit = true;
 			hitRecord.materialIndex = sphere.materialIndex;
-			hitRecord.t = Vector3::Dot(originToSphere, ray.direction) - tHC;
+			hitRecord.t = t0;
+			hitRecord.origin = ray.origin + t0 * ray.direction;
+			hitRecord.normal = hitRecord.origin - sphere.origin;
+			hitRecord.normal.Normalize();
 			return true;
 		}
 
@@ -52,6 +55,8 @@ namespace dae
 				hitRecord.didHit = true;
 				hitRecord.materialIndex = plane.materialIndex;
 				hitRecord.t = t;
+				hitRecord.origin = ray.origin + t * ray.direction;
+				hitRecord.normal = plane.normal;
 				return true;
 			}
 
@@ -100,8 +105,7 @@ namespace dae
 		//Direction from target to light
 		inline Vector3 GetDirectionToLight(const Light& light, const Vector3 origin)
 		{
-			//todo W3
-			assert(false && "No Implemented Yet!");
+			if (light.type != LightType::Directional) return { light.origin - origin };
 			return {};
 		}
 
