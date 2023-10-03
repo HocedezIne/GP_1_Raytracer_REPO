@@ -23,6 +23,12 @@ Renderer::Renderer(SDL_Window * pWindow) :
 
 void Renderer::Render(Scene* pScene) const
 {
+	//TODO find where this needs to live
+	////Keyboard Input
+	//const uint8_t* pKeyboardState = SDL_GetKeyboardState(nullptr);
+	//if (pKeyboardState[SDL_SCANCODE_F2]) ToggleShadows();
+	//if (pKeyboardState[SDL_SCANCODE_F3]) CycleLightingMode();
+
 	Camera& camera = pScene->GetCamera();
 	auto& materials = pScene->GetMaterials();
 	auto& lights = pScene->GetLights();
@@ -52,17 +58,20 @@ void Renderer::Render(Scene* pScene) const
 			{
 				finalColor = materials[closestHit.materialIndex]->Shade();
 
-				for (Light light : lights)
+				for (const Light& light : lights)
 				{
-					Ray rayToLight{ closestHit.origin, LightUtils::GetDirectionToLight(light, closestHit.origin) };
-					rayToLight.origin += closestHit.normal * 0.001f;
-					rayToLight.max = rayToLight.direction.Magnitude();
-					rayToLight.direction.Normalize();
+					const Vector3 direction{ LightUtils::GetDirectionToLight(light, closestHit.origin) };
+					Ray rayToLight{ closestHit.origin + closestHit.normal * 0.001f, direction.Normalized()};
+					if (light.type == LightType::Point) rayToLight.max = direction.Magnitude();
+					else rayToLight.max = FLT_MAX;
 
-					if (pScene->DoesHit(rayToLight))
+					if (pScene->DoesHit(rayToLight) && m_ShadowsEnabled)
 					{
 						finalColor *= 0.5f;
 					}
+
+					float observedArea{ Vector3::Dot(rayToLight.direction, closestHit.normal) / rayToLight.max };
+					
 				}
 			}
 
@@ -84,4 +93,23 @@ void Renderer::Render(Scene* pScene) const
 bool Renderer::SaveBufferToImage() const
 {
 	return SDL_SaveBMP(m_pBuffer, "RayTracing_Buffer.bmp");
+}
+
+void Renderer::CycleLightingMode()
+{
+	switch (m_CurrentLightingMode)
+	{
+	case dae::Renderer::LightingMode::ObservedArea:
+		m_CurrentLightingMode = LightingMode::Radience;
+		break;
+	case dae::Renderer::LightingMode::Radience:
+		m_CurrentLightingMode = LightingMode::BRDF;
+		break;
+	case dae::Renderer::LightingMode::BRDF:
+		m_CurrentLightingMode = LightingMode::Combined;
+		break;
+	case dae::Renderer::LightingMode::Combined:
+		m_CurrentLightingMode = LightingMode::ObservedArea;
+		break;
+	}
 }
