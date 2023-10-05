@@ -109,7 +109,7 @@ namespace dae
 			case LightType::Point:
 				return { light.origin - origin };
 			case LightType::Directional:
-				return {-light.direction};
+				return {light.direction};
 			}
 
 			return {};

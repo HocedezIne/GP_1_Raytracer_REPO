@@ -23,12 +23,6 @@ Renderer::Renderer(SDL_Window * pWindow) :
 
 void Renderer::Render(Scene* pScene) const
 {
-	//TODO find where this needs to live
-	////Keyboard Input
-	//const uint8_t* pKeyboardState = SDL_GetKeyboardState(nullptr);
-	//if (pKeyboardState[SDL_SCANCODE_F2]) ToggleShadows();
-	//if (pKeyboardState[SDL_SCANCODE_F3]) CycleLightingMode();
-
 	Camera& camera = pScene->GetCamera();
 	auto& materials = pScene->GetMaterials();
 	auto& lights = pScene->GetLights();
@@ -68,10 +62,10 @@ void Renderer::Render(Scene* pScene) const
 					if (pScene->DoesHit(rayToLight) && m_ShadowsEnabled)
 					{
 						finalColor *= 0.5f;
-					}
+					}	
 
-					float observedArea{ Vector3::Dot(rayToLight.direction, closestHit.normal) / rayToLight.max };
-					
+					float observedArea{ Vector3::Dot(-rayToLight.direction, closestHit.normal) / rayToLight.max };
+					finalColor += {observedArea, observedArea, observedArea};
 				}
 			}
 
