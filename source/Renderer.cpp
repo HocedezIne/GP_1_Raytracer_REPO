@@ -50,8 +50,6 @@ void Renderer::Render(Scene* pScene) const
 			pScene->GetClosestHit(hitRay, closestHit);
 			if (closestHit.didHit)
 			{
-				finalColor = materials[closestHit.materialIndex]->Shade();
-
 				for (const Light& light : lights)
 				{
 					const Vector3 direction{ LightUtils::GetDirectionToLight(light, closestHit.origin) };
@@ -59,13 +57,34 @@ void Renderer::Render(Scene* pScene) const
 					if (light.type == LightType::Point) rayToLight.max = direction.Magnitude();
 					else rayToLight.max = FLT_MAX;
 
+					// Observed area calc + early escape
+					const float observedArea{ Vector3::Dot(closestHit.normal, direction) / direction.Magnitude() };
+					if (observedArea <= 0.f) continue;
+
+					// Shadows
 					if (pScene->DoesHit(rayToLight) && m_ShadowsEnabled)
 					{
-						finalColor *= 0.5f;
-					}	
+						//finalColor *= 0.5f;
+						continue;
+					}
 
-					float observedArea{ Vector3::Dot(-rayToLight.direction, closestHit.normal) / rayToLight.max };
-					finalColor += {observedArea, observedArea, observedArea};
+					// Incident Radiance
+					if (m_CurrentLightingMode == LightingMode::Radience)
+					{
+						finalColor += LightUtils::GetRadiance(light, closestHit.origin);
+					}
+
+					// Observed Area
+					if (m_CurrentLightingMode == LightingMode::ObservedArea)
+					{
+						finalColor += {observedArea, observedArea, observedArea};
+					}
+
+
+					if (m_CurrentLightingMode == LightingMode::Combined)
+					{
+						finalColor += LightUtils::GetRadiance(light, closestHit.origin) * observedArea;
+					}
 				}
 			}
 

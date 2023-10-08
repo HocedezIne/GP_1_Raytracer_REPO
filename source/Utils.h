@@ -110,19 +110,24 @@ namespace dae
 				return { light.origin - origin };
 			case LightType::Directional:
 				return {light.direction};
+			default:
+				return{};
 			}
-
-			return {};
 		}
 
 		inline ColorRGB GetRadiance(const Light& light, const Vector3& target)
 		{
+			const Vector3 radius{ light.origin - target };
+
 			switch (light.type)
 			{
+			case LightType::Point:
+				return { light.color * (light.intensity / Vector3::Dot(radius, radius)) };
+			case LightType::Directional:
+				return { light.color * light.intensity };
 			default:
-				break;
+				return{};
 			}
-			return {};
 		}
 	}
 
