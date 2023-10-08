@@ -62,11 +62,7 @@ void Renderer::Render(Scene* pScene) const
 					if (observedArea <= 0.f) continue;
 
 					// Shadows
-					if (pScene->DoesHit(rayToLight) && m_ShadowsEnabled)
-					{
-						//finalColor *= 0.5f;
-						continue;
-					}
+					if (pScene->DoesHit(rayToLight) && m_ShadowsEnabled) continue;
 
 					// Incident Radiance
 					if (m_CurrentLightingMode == LightingMode::Radience)
@@ -75,15 +71,20 @@ void Renderer::Render(Scene* pScene) const
 					}
 
 					// Observed Area
-					if (m_CurrentLightingMode == LightingMode::ObservedArea)
+					else if (m_CurrentLightingMode == LightingMode::ObservedArea)
 					{
 						finalColor += {observedArea, observedArea, observedArea};
 					}
 
-
-					if (m_CurrentLightingMode == LightingMode::Combined)
+					else if (m_CurrentLightingMode == LightingMode::BRDF)
 					{
-						finalColor += LightUtils::GetRadiance(light, closestHit.origin) * observedArea;
+						finalColor += materials[closestHit.materialIndex]->Shade();
+					}
+
+					// Combined
+					else if (m_CurrentLightingMode == LightingMode::Combined)
+					{
+						finalColor += LightUtils::GetRadiance(light, closestHit.origin) * materials[closestHit.materialIndex]->Shade() * observedArea;
 					}
 				}
 			}
