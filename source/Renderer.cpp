@@ -64,27 +64,23 @@ void Renderer::Render(Scene* pScene) const
 					// Shadows
 					if (pScene->DoesHit(rayToLight) && m_ShadowsEnabled) continue;
 
-					// Incident Radiance
-					if (m_CurrentLightingMode == LightingMode::Radience)
-					{
-						finalColor += LightUtils::GetRadiance(light, closestHit.origin);
-					}
 
-					// Observed Area
-					else if (m_CurrentLightingMode == LightingMode::ObservedArea)
+					switch (m_CurrentLightingMode)
 					{
+					case dae::Renderer::LightingMode::ObservedArea:
 						finalColor += {observedArea, observedArea, observedArea};
-					}
-
-					else if (m_CurrentLightingMode == LightingMode::BRDF)
-					{
-						finalColor += materials[closestHit.materialIndex]->Shade();
-					}
-
-					// Combined
-					else if (m_CurrentLightingMode == LightingMode::Combined)
-					{
-						finalColor += LightUtils::GetRadiance(light, closestHit.origin) * materials[closestHit.materialIndex]->Shade() * observedArea;
+						break;
+					case dae::Renderer::LightingMode::Radience:
+						finalColor += LightUtils::GetRadiance(light, closestHit.origin);
+						break;
+					case dae::Renderer::LightingMode::BRDF:
+						finalColor += materials[closestHit.materialIndex]->Shade(closestHit, rayToLight.direction, hitRay.direction);
+						break;
+					case dae::Renderer::LightingMode::Combined:
+						finalColor += LightUtils::GetRadiance(light, closestHit.origin) *
+							materials[closestHit.materialIndex]->Shade(closestHit, rayToLight.direction, hitRay.direction) *
+							observedArea;
+						break;
 					}
 				}
 			}
