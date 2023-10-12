@@ -25,14 +25,13 @@ namespace dae
 
 			const float t0{ originToSphereDot - tHC};
 			const float t1{ originToSphereDot + tHC};
-			if (t0 < ray.min || t1 > ray.max) return false; // no spheres fall outside the range so check creates overhead and slows down raytracing
+			if (t0 < ray.min || t1 > ray.max) return false;
 
 			hitRecord.didHit = true;
 			hitRecord.materialIndex = sphere.materialIndex;
 			hitRecord.t = t0;
 			hitRecord.origin = ray.origin + t0 * ray.direction;
-			hitRecord.normal = hitRecord.origin - sphere.origin;
-			hitRecord.normal.Normalize();
+			hitRecord.normal = (hitRecord.origin - sphere.origin).Normalized();
 			return true;
 		}
 
@@ -105,15 +104,30 @@ namespace dae
 		//Direction from target to light
 		inline Vector3 GetDirectionToLight(const Light& light, const Vector3 origin)
 		{
-			if (light.type != LightType::Directional) return { light.origin - origin };
-			return {};
+			switch (light.type)
+			{
+			case LightType::Point:
+				return { light.origin - origin };
+			case LightType::Directional:
+				return {light.direction};
+			default:
+				return{};
+			}
 		}
 
 		inline ColorRGB GetRadiance(const Light& light, const Vector3& target)
 		{
-			//todo W3
-			assert(false && "No Implemented Yet!");
-			return {};
+			const Vector3 radius{ light.origin - target };
+
+			switch (light.type)
+			{
+			case LightType::Point:
+				return { light.color * (light.intensity / Vector3::Dot(radius, radius)) };
+			case LightType::Directional:
+				return { light.color * light.intensity };
+			default:
+				return{};
+			}
 		}
 	}
 
