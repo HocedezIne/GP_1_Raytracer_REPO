@@ -132,7 +132,7 @@ namespace dae
 			const ColorRGB diffuse{ BRDF::Lambert(kd, m_Albedo) };
 
 			// return diffuse + specular
-			return {diffuse};
+			return {diffuse + specular};
 		}
 
 	private:
