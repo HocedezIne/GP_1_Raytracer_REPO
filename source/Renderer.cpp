@@ -42,23 +42,23 @@ void Renderer::Render(Scene* pScene) const
 			rayDirection = camera.CalculateCameraToWorld().TransformVector(rayDirection);
 			rayDirection.Normalize();
 
-			Ray hitRay{ camera.origin, rayDirection };
+			Ray viewRay{ camera.origin, rayDirection };
 
 			ColorRGB finalColor{};
 			HitRecord closestHit{};
 
-			pScene->GetClosestHit(hitRay, closestHit);
+			pScene->GetClosestHit(viewRay, closestHit);
 			if (closestHit.didHit)
 			{
 				for (const Light& light : lights)
 				{
-					const Vector3 direction{ LightUtils::GetDirectionToLight(light, closestHit.origin) };
-					Ray rayToLight{ closestHit.origin + closestHit.normal * 0.001f, direction.Normalized()};
-					if (light.type == LightType::Point) rayToLight.max = direction.Magnitude();
+					const Vector3 lightDirection{ LightUtils::GetDirectionToLight(light, closestHit.origin) };
+					Ray rayToLight{ closestHit.origin + closestHit.normal * 0.001f, lightDirection.Normalized()};
+					if (light.type == LightType::Point) rayToLight.max = lightDirection.Magnitude();
 					else rayToLight.max = FLT_MAX;
 
 					// Observed area calc + early escape
-					const float observedArea{ Vector3::Dot(closestHit.normal, direction) / direction.Magnitude() };
+					const float observedArea{ Vector3::Dot(closestHit.normal, lightDirection) / lightDirection.Magnitude() };
 					if (observedArea <= 0.f) continue;
 
 					// Shadows
@@ -74,11 +74,11 @@ void Renderer::Render(Scene* pScene) const
 						finalColor += LightUtils::GetRadiance(light, closestHit.origin);
 						break;
 					case dae::Renderer::LightingMode::BRDF:
-						finalColor += materials[closestHit.materialIndex]->Shade(closestHit, rayToLight.direction, hitRay.direction);
+						finalColor += materials[closestHit.materialIndex]->Shade(closestHit, rayToLight.direction, -rayDirection);
 						break;
 					case dae::Renderer::LightingMode::Combined:
 						finalColor += LightUtils::GetRadiance(light, closestHit.origin) *
-							materials[closestHit.materialIndex]->Shade(closestHit, rayToLight.direction, hitRay.direction) *
+							materials[closestHit.materialIndex]->Shade(closestHit, rayToLight.direction, -rayDirection) *
 							observedArea;
 						break;
 					}
@@ -107,19 +107,5 @@ bool Renderer::SaveBufferToImage() const
 
 void Renderer::CycleLightingMode()
 {
-	switch (m_CurrentLightingMode)
-	{
-	case dae::Renderer::LightingMode::ObservedArea:
-		m_CurrentLightingMode = LightingMode::Radience;
-		break;
-	case dae::Renderer::LightingMode::Radience:
-		m_CurrentLightingMode = LightingMode::BRDF;
-		break;
-	case dae::Renderer::LightingMode::BRDF:
-		m_CurrentLightingMode = LightingMode::Combined;
-		break;
-	case dae::Renderer::LightingMode::Combined:
-		m_CurrentLightingMode = LightingMode::ObservedArea;
-		break;
-	}
+	m_CurrentLightingMode = static_cast<LightingMode>((int(m_CurrentLightingMode)+1) % 4);
 }

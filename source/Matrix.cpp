@@ -149,7 +149,7 @@ namespace dae {
 		const float sinp{ sinf(roll) };
 		const float cosp{ cosf(roll) };
 		
-		out.data[0] = { cosp, sinp, 0.f, 1.f };
+		out.data[0] = { cosp, sinp, 0.f, 0.f };
 		out.data[1] = { -sinp, cosp, 0.f, 0.f };
 		out.data[2] = { 0.f, 0.f, 1.f, 0.f };
 		out.data[3] = { 0.f, 0.f, 0.f, 1.f };

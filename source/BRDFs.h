@@ -35,7 +35,6 @@ namespace dae
 			const Vector3 reflect{ l - 2 * Vector3::Dot(n,l) * n };
 			const float cosAlpha{ std::max(0.f, Vector3::Dot(reflect, -v)) };
 			const float specular{ ks * powf(cosAlpha, exp) };
-			//specular = std::max(0.f, ks * powf(cosAlpha, exp));
 			return { specular, specular, specular };
 		}
 
@@ -48,9 +47,8 @@ namespace dae
 		 */
 		static ColorRGB FresnelFunction_Schlick(const Vector3& h, const Vector3& v, const ColorRGB& f0)
 		{
-			//todo: W3
-			assert(false && "Not Implemented Yet");
-			return {};
+			const float schlick { 1 - Vector3::Dot(h,v) };
+			return { f0 + (ColorRGB{1,1,1} - f0) * (schlick * schlick * schlick * schlick * schlick) };
 		}
 
 		/**
@@ -62,9 +60,10 @@ namespace dae
 		 */
 		static float NormalDistribution_GGX(const Vector3& n, const Vector3& h, float roughness)
 		{
-			//todo: W3
-			assert(false && "Not Implemented Yet");
-			return {};
+			const float a{ Square(roughness) };
+			const float dot{ Square(Vector3::Dot(n,h)) };
+
+			return {a / (PI * Square( dot*(a-1.f) +1.f) )};
 		}
 
 
