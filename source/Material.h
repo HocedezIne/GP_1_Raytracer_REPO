@@ -120,7 +120,7 @@ namespace dae
 			const float D{BRDF::NormalDistribution_GGX(hitRecord.normal, h, m_Roughness*m_Roughness)};
 
 			// geometry
-			//const ColorRGB G{};
+			const float G{BRDF::GeometryFunction_Smith(hitRecord.normal, v, l, m_Roughness*m_Roughness)};
 
 			// calc specular
 			//const float divisor{ 4 * Vector3::Dot(v, hitRecord.normal) * Vector3::Dot(l, hitRecord.normal) };
@@ -131,7 +131,7 @@ namespace dae
 			//const ColorRGB kd = (m_Metalness == 0) ? ColorRGB{} : ColorRGB{ 1.f,1.f,1.f } - F;
 
 			// return diffuse + specular
-			return {F};
+			return {G,G,G};
 		}
 
 	private:
