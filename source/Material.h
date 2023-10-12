@@ -128,10 +128,11 @@ namespace dae
 			specular /= divisor;
 
 			// determine kd to calc lambert diffuse
-			//const ColorRGB kd = (m_Metalness == 0) ? ColorRGB{} : ColorRGB{ 1.f,1.f,1.f } - F;
+			const ColorRGB kd = (m_Metalness == 0) ? ColorRGB{ 1.f,1.f,1.f } - F : ColorRGB{};
+			const ColorRGB diffuse{ BRDF::Lambert(kd, m_Albedo) };
 
 			// return diffuse + specular
-			return {specular};
+			return {diffuse};
 		}
 
 	private:
