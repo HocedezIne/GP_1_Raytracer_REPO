@@ -123,15 +123,15 @@ namespace dae
 			const float G{BRDF::GeometryFunction_Smith(hitRecord.normal, v, l, m_Roughness*m_Roughness)};
 
 			// calc specular
-			//const float divisor{ 4 * Vector3::Dot(v, hitRecord.normal) * Vector3::Dot(l, hitRecord.normal) };
-			//ColorRGB specular{ F };
-			//specular /= divisor;
+			const float divisor{ 4 * Vector3::Dot(v, hitRecord.normal) * Vector3::Dot(l, hitRecord.normal) };
+			ColorRGB specular{ (D*F*G)};
+			specular /= divisor;
 
 			// determine kd to calc lambert diffuse
 			//const ColorRGB kd = (m_Metalness == 0) ? ColorRGB{} : ColorRGB{ 1.f,1.f,1.f } - F;
 
 			// return diffuse + specular
-			return {G,G,G};
+			return {specular};
 		}
 
 	private:
