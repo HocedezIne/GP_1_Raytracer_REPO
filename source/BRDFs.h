@@ -11,12 +11,12 @@ namespace dae
 		 * \param cd Diffuse Color
 		 * \return Lambert Diffuse Color
 		 */
-		static ColorRGB Lambert(float kd, const ColorRGB& cd)
+		static inline ColorRGB Lambert(float kd, const ColorRGB& cd)
 		{
 			return { (cd * kd) / PI };
 		}
 
-		static ColorRGB Lambert(const ColorRGB& kd, const ColorRGB& cd)
+		static inline ColorRGB Lambert(const ColorRGB& kd, const ColorRGB& cd)
 		{
 			return { (cd * kd) / PI };
 		}
