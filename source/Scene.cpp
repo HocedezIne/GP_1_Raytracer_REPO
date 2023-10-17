@@ -295,6 +295,10 @@ namespace dae {
 			0,2,3  // Triangle 2
 		};
 		triangleMesh->CalculateNormals();
+
+		triangleMesh->Translate({ 0.f,1.5f,0.f });
+		triangleMesh->RotateY(45.f);
+
 		triangleMesh->UpdateTransforms();
 
 		//Light
