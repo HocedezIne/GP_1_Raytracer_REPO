@@ -289,10 +289,10 @@ namespace dae {
 
 		// Triangle Mesh
 		const auto triangleMesh = AddTriangleMesh(TriangleCullMode::NoCulling, matLambert_White);
-		triangleMesh->positions = { {-.75f, -1.f, 0.f}, {-.75f, 1.f, 0.f}, {.75f, 1.f, 0.f}, {.75f, -1.f, 0.f} };
+		triangleMesh->positions = { {-.75f, -1.f, 0.f}, {-.75f, 1.f, 0.f}, {.75f, 1.f, 1.f}, {.75f, -1.f, 0.f} };
 		triangleMesh->indices = {
 			0,1,2, // Triangle 1
-			0,2,3 // Triangle 2
+			0,2,3  // Triangle 2
 		};
 		triangleMesh->CalculateNormals();
 		triangleMesh->UpdateTransforms();

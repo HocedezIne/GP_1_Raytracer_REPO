@@ -123,7 +123,7 @@ namespace dae
 
 		void CalculateNormals()
 		{
-			for (int i{}; i < indices.size(); i+3)
+			for (int i{}; i < indices.size(); i+=3)
 			{
 				const Vector3 a{ positions[indices[i + 1]] - positions[indices[i]] };
 				const Vector3 b{ positions[indices[i + 2]] - positions[indices[i + 1]] };
@@ -133,7 +133,8 @@ namespace dae
 		
 		void UpdateTransforms()
 		{
-			assert(false && "No Implemented Yet!");
+			transformedPositions = positions;
+			transformedNormals = normals;
 			//Calculate Final Transform 
 			//const auto finalTransform = ...
 

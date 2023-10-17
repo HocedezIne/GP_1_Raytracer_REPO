@@ -98,7 +98,7 @@ namespace dae
 			// check if hitpoint inside triangle
 			const Vector3 P{ ray.origin + ray.direction * t };
 
-			const Vector3* triangleVerts[3] = { &triangle.v0, &triangle.v1, &triangle.v2 };
+			const std::vector<const Vector3*> triangleVerts = { &triangle.v0, &triangle.v1, &triangle.v2 };
 
 			for (int i = 0; i < 3; i++)
 			{
@@ -126,9 +126,25 @@ namespace dae
 #pragma region TriangeMesh HitTest
 		inline bool HitTest_TriangleMesh(const TriangleMesh& mesh, const Ray& ray, HitRecord& hitRecord, bool ignoreHitRecord = false)
 		{
-			//todo W5
-			assert(false && "No Implemented Yet!");
-			return false;
+			if (ignoreHitRecord) return false;
+
+			Ray workingRay = ray;
+			for (int i{}; i < mesh.indices.size(); i+=3)
+			{
+				Triangle triangle{ mesh.positions[mesh.indices[i]], mesh.positions[mesh.indices[i + 1]], mesh.positions[mesh.indices[i + 2]] };
+				triangle.cullMode = mesh.cullMode;
+				triangle.materialIndex = mesh.materialIndex;
+
+				if (HitTest_Triangle(triangle, workingRay, hitRecord))
+				{
+					workingRay.max = hitRecord.t;
+				}
+			}
+			
+			if (!hitRecord.didHit) return false;
+
+			hitRecord.materialIndex = mesh.materialIndex;
+			return true;
 		}
 
 		inline bool HitTest_TriangleMesh(const TriangleMesh& mesh, const Ray& ray)
