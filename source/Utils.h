@@ -131,7 +131,7 @@ namespace dae
 			Ray workingRay = ray;
 			for (int i{}; i < mesh.indices.size(); i+=3)
 			{
-				Triangle triangle{ mesh.positions[mesh.indices[i]], mesh.positions[mesh.indices[i + 1]], mesh.positions[mesh.indices[i + 2]] };
+				Triangle triangle{ mesh.transformedPositions[mesh.indices[i]], mesh.transformedPositions[mesh.indices[i + 1]], mesh.transformedPositions[mesh.indices[i + 2]] };
 				triangle.cullMode = mesh.cullMode;
 				triangle.materialIndex = mesh.materialIndex;
 

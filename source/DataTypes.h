@@ -133,16 +133,22 @@ namespace dae
 		
 		void UpdateTransforms()
 		{
-			transformedPositions = positions;
-			transformedNormals = normals;
 			//Calculate Final Transform 
-			//const auto finalTransform = ...
+			const auto finalTransform{ translationTransform * rotationTransform * scaleTransform };
 
 			//Transform Positions (positions > transformedPositions)
-			//...
+			transformedPositions.reserve(positions.size());
+			for (const Vector3 position : positions)
+			{
+				transformedPositions.emplace_back(finalTransform.TransformVector(position));
+			}
 
 			//Transform Normals (normals > transformedNormals)
-			//...
+			transformedPositions.reserve(normals.size());
+			for (const Vector3 normal : normals)
+			{
+				transformedPositions.emplace_back(finalTransform.TransformVector(normal));
+			}
 		}
 	};
 #pragma endregion

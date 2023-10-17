@@ -297,7 +297,7 @@ namespace dae {
 		triangleMesh->CalculateNormals();
 
 		triangleMesh->Translate({ 0.f,1.5f,0.f });
-		triangleMesh->RotateY(45.f);
+		triangleMesh->RotateY(40.f);
 
 		triangleMesh->UpdateTransforms();
 
