@@ -28,24 +28,37 @@ namespace dae {
 
 	void dae::Scene::GetClosestHit(const Ray& ray, HitRecord& closestHit) const
 	{
+		Ray workingRay = ray;
 		float smallestT{ ray.max };
 		HitRecord hit{};
 
-		for (const Sphere& sphere : m_SphereGeometries)
+		for (const Plane& plane : m_PlaneGeometries)
 		{
-			if (GeometryUtils::HitTest_Sphere(sphere, ray, hit) && hit.t < smallestT)
+			if (GeometryUtils::HitTest_Plane(plane, workingRay, hit) && hit.t < smallestT)
 			{
 				closestHit = hit;
 				smallestT = hit.t;
+				workingRay.max = smallestT;
 			}
 		}
 
-		for (const Plane& plane : m_PlaneGeometries)
+		for (const Triangle& triangle : m_Triangles)
 		{
-			if (GeometryUtils::HitTest_Plane(plane, ray, hit) && hit.t < smallestT)
+			if (GeometryUtils::HitTest_Triangle(triangle, workingRay, hit) && hit.t < smallestT)
 			{
 				closestHit = hit;
 				smallestT = hit.t;
+				workingRay.max = smallestT;
+			}
+		}
+
+		for (const Sphere& sphere : m_SphereGeometries)
+		{
+			if (GeometryUtils::HitTest_Sphere(sphere, workingRay, hit) && hit.t < smallestT)
+			{
+				closestHit = hit;
+				smallestT = hit.t;
+				workingRay.max = smallestT;
 			}
 		}
 	}
@@ -57,6 +70,14 @@ namespace dae {
 		for (const Plane& plane : m_PlaneGeometries)
 		{
 			if (GeometryUtils::HitTest_Plane(plane, ray, hit))
+			{
+				return true;
+			}
+		}
+
+		for (const Triangle& triangle : m_Triangles)
+		{
+			if (GeometryUtils::HitTest_Triangle(triangle, ray, hit))
 			{
 				return true;
 			}
@@ -261,7 +282,7 @@ namespace dae {
 
 		// Triangle (Temp)
 		auto triangle = Triangle({ -.75f, .5f, .0f }, { -.75f, 2.f, .0f }, { .75f, .5f, .0f });
-		triangle.cullMode = TriangleCullMode::NoCulling;
+		triangle.cullMode = TriangleCullMode::BackFaceCulling;
 		triangle.materialIndex = matLambert_White;
 
 		m_Triangles.emplace_back(triangle);
