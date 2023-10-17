@@ -242,4 +242,35 @@ namespace dae {
 
 	}
 #pragma endregion
+
+#pragma region SCENE W4 TESTSCENE
+	void Scene_W4_TestScene::Initialize()
+	{
+		m_Camera.origin = { 0.f, 3.f, -9.f };
+		m_Camera.fovAngle = 45.f;
+
+		const auto matLambert_GrayBlue = AddMaterial(new Material_Lambert({ .49f, .57f, .57f }, 1.f));
+		const auto matLambert_White = AddMaterial(new Material_Lambert(colors::White, 1.f));
+
+		//Plane
+		AddPlane({ 0.f,  0.f, 10.f }, { 0.f,  0.f, -1.f }, matLambert_GrayBlue); //back
+		AddPlane({ 0.f,  0.f,  0.f }, { 0.f,  1.f,  0.f }, matLambert_GrayBlue); //bottom
+		AddPlane({ 0.f, 10.f,  0.f }, { 0.f, -1.f,  0.f }, matLambert_GrayBlue); //top
+		AddPlane({ 5.f,  0.f,  0.f }, { -1.f,  0.f,  0.f }, matLambert_GrayBlue); //right
+		AddPlane({ -5.f,  0.f,  0.f }, { 1.f,  0.f,  0.f }, matLambert_GrayBlue); //left
+
+		// Triangle (Temp)
+		auto triangle = Triangle({ -.75f, .5f, .0f }, { -.75f, 2.f, .0f }, { .75f, .5f, .0f });
+		triangle.cullMode = TriangleCullMode::NoCulling;
+		triangle.materialIndex = matLambert_White;
+
+		m_Triangles.emplace_back(triangle);
+
+		//Light
+		AddPointLight({ 0.f, 5.f, 5.f }, 50.f, ColorRGB{ 1.f,.61f,.45f }); //backlight
+		AddPointLight({ -2.5f, 5.f, -5.f }, 70.f, ColorRGB{ 1.f,.8f,.45f }); //front left
+		AddPointLight({ 2.5f, 2.5f, -5.f }, 50.f, ColorRGB{ .34f,.47f,.68f }); //front right
+
+	}
+#pragma endregion
 }
