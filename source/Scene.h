@@ -124,5 +124,9 @@ namespace dae
 		Scene_W4_TestScene& operator=(Scene_W4_TestScene&&) noexcept = delete;
 
 		void Initialize() override;
+		void Update(Timer* pTimer) override;
+
+	private:
+		TriangleMesh* pMesh{ nullptr };
 	};
 }

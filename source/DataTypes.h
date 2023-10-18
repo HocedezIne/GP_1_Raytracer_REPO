@@ -137,6 +137,7 @@ namespace dae
 			const auto finalTransform{ translationTransform * rotationTransform * scaleTransform };
 
 			//Transform Positions (positions > transformedPositions)
+			transformedPositions.clear();
 			transformedPositions.reserve(positions.size());
 			for (const Vector3 position : positions)
 			{
@@ -144,10 +145,11 @@ namespace dae
 			}
 
 			//Transform Normals (normals > transformedNormals)
-			transformedPositions.reserve(normals.size());
+			transformedNormals.clear();
+			transformedNormals.reserve(normals.size());
 			for (const Vector3 normal : normals)
 			{
-				transformedPositions.emplace_back(finalTransform.TransformVector(normal));
+				transformedNormals.emplace_back(finalTransform.TransformVector(normal));
 			}
 		}
 	};
