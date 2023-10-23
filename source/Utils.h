@@ -72,9 +72,49 @@ namespace dae
 		//TRIANGLE HIT-TESTS
 		inline bool HitTest_Triangle(const Triangle& triangle, const Ray& ray, HitRecord& hitRecord, bool ignoreHitRecord = false)
 		{
-			//todo W5
-			assert(false && "No Implemented Yet!");
-			return false;
+			if (ignoreHitRecord) return false;
+
+			// normal vs raydirection check
+			const Vector3 a{ triangle.v1 - triangle.v0 };
+			const Vector3 b{ triangle.v2 - triangle.v1 };
+			const Vector3 triangleNormal{ Vector3::Cross(a,b) };
+
+			const float normalRayDot{ Vector3::Dot(triangleNormal, ray.direction) };
+			if (AreEqual(normalRayDot, 0)) return false; // ray is parrallel to triangle
+
+			// cull mode check
+			if ( (normalRayDot > 0 && triangle.cullMode == TriangleCullMode::BackFaceCulling ) ||
+				 (normalRayDot < 0 && triangle.cullMode == TriangleCullMode::FrontFaceCulling) )
+			{
+				return false;
+			}
+
+			// ray-plane test + t range check
+			const Vector3 L{ triangle.v0 - ray.origin };
+
+			const float t{ Vector3::Dot(L, triangleNormal) / Vector3::Dot(ray.direction, triangleNormal) };
+			if (t < ray.min || t > ray.max) return false;
+
+			// check if hitpoint inside triangle
+			const Vector3 P{ ray.origin + ray.direction * t };
+
+			const std::vector<const Vector3*> triangleVerts = { &triangle.v0, &triangle.v1, &triangle.v2 };
+
+			for (int i = 0; i < 3; i++)
+			{
+				const Vector3 e{ *triangleVerts[(i+1)%3] - *triangleVerts[i]};
+				const Vector3 p{ P - *triangleVerts[i] };
+				if (Vector3::Dot(Vector3::Cross(e, p), triangleNormal) < 0) return false;
+			}
+
+			//hit record
+			hitRecord.didHit = true;
+			hitRecord.materialIndex = triangle.materialIndex;
+			hitRecord.normal = triangleNormal;
+			hitRecord.origin = P;
+			hitRecord.t = t;
+
+			return true;
 		}
 
 		inline bool HitTest_Triangle(const Triangle& triangle, const Ray& ray)
@@ -86,9 +126,25 @@ namespace dae
 #pragma region TriangeMesh HitTest
 		inline bool HitTest_TriangleMesh(const TriangleMesh& mesh, const Ray& ray, HitRecord& hitRecord, bool ignoreHitRecord = false)
 		{
-			//todo W5
-			assert(false && "No Implemented Yet!");
-			return false;
+			if (ignoreHitRecord) return false;
+
+			Ray workingRay = ray;
+			for (int i{}; i < mesh.indices.size(); i+=3)
+			{
+				Triangle triangle{ mesh.transformedPositions[mesh.indices[i]], mesh.transformedPositions[mesh.indices[i + 1]], mesh.transformedPositions[mesh.indices[i + 2]] };
+				triangle.cullMode = mesh.cullMode;
+				triangle.materialIndex = mesh.materialIndex;
+
+				if (HitTest_Triangle(triangle, workingRay, hitRecord))
+				{
+					workingRay.max = hitRecord.t;
+				}
+			}
+			
+			if (!hitRecord.didHit) return false;
+
+			hitRecord.materialIndex = mesh.materialIndex;
+			return true;
 		}
 
 		inline bool HitTest_TriangleMesh(const TriangleMesh& mesh, const Ray& ray)

@@ -107,7 +107,7 @@ namespace dae
 		ColorRGB Shade(const HitRecord& hitRecord = {}, const Vector3& l = {}, const Vector3& v = {}) override
 		{
 			// calc f0
-			const ColorRGB f0 = (m_Metalness == 0) ? ColorRGB{ .04f, .04f, .04f } : m_Albedo;
+			const ColorRGB f0 = (AreEqual(m_Metalness, 0)) ? ColorRGB{ .04f, .04f, .04f } : m_Albedo;
 
 			// half vector
 			Vector3 h{ v.Normalized() + l.Normalized()};
@@ -128,7 +128,7 @@ namespace dae
 			specular /= divisor;
 
 			// determine kd to calc lambert diffuse
-			const ColorRGB kd = (m_Metalness == 0) ? ColorRGB{ 1.f,1.f,1.f } - F : ColorRGB{};
+			const ColorRGB kd = (AreEqual(m_Metalness, 0)) ? ColorRGB{ 1.f,1.f,1.f } - F : ColorRGB{};
 			const ColorRGB diffuse{ BRDF::Lambert(kd, m_Albedo) };
 
 			// return diffuse + specular
