@@ -124,5 +124,48 @@ namespace dae
 		Scene_W4_TestScene& operator=(Scene_W4_TestScene&&) noexcept = delete;
 
 		void Initialize() override;
+		void Update(Timer* pTimer) override;
+
+	private:
+		TriangleMesh* pMesh{ nullptr };
+	};
+
+
+	// Reference Scene
+	class Scene_ReferenceScene final : public Scene
+	{
+	public:
+		Scene_ReferenceScene() = default;
+		~Scene_ReferenceScene() override = default;
+
+		Scene_ReferenceScene(const Scene_ReferenceScene&) = delete;
+		Scene_ReferenceScene(Scene_ReferenceScene&&) noexcept = delete;
+		Scene_ReferenceScene& operator=(const Scene_ReferenceScene&) = delete;
+		Scene_ReferenceScene& operator=(Scene_ReferenceScene&&) noexcept = delete;
+
+		void Initialize() override;
+		void Update(Timer* pTimer) override;
+
+	private:
+		TriangleMesh* m_Meshes[3]{};
+	};
+
+	// Bunny Scene
+	class Scene_BunnyScene final : public Scene
+	{
+	public:
+		Scene_BunnyScene() = default;
+		~Scene_BunnyScene() override = default;
+
+		Scene_BunnyScene(const Scene_BunnyScene&) = delete;
+		Scene_BunnyScene(Scene_BunnyScene&&) noexcept = delete;
+		Scene_BunnyScene& operator=(const Scene_BunnyScene&) = delete;
+		Scene_BunnyScene& operator=(Scene_BunnyScene&&) noexcept = delete;
+
+		void Initialize() override;
+		void Update(Timer* pTimer) override;
+
+	private:
+		TriangleMesh* pBunny{nullptr};
 	};
 }

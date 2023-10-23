@@ -134,20 +134,22 @@ namespace dae
 		void UpdateTransforms()
 		{
 			//Calculate Final Transform 
-			const auto finalTransform{ translationTransform * rotationTransform * scaleTransform };
+			const Matrix finalTransform{ scaleTransform * rotationTransform * translationTransform };
 
 			//Transform Positions (positions > transformedPositions)
+			transformedPositions.clear();
 			transformedPositions.reserve(positions.size());
-			for (const Vector3 position : positions)
+			for (const Vector3& position : positions)
 			{
-				transformedPositions.emplace_back(finalTransform.TransformVector(position));
+				transformedPositions.emplace_back(finalTransform.TransformPoint(position));
 			}
 
 			//Transform Normals (normals > transformedNormals)
-			transformedPositions.reserve(normals.size());
-			for (const Vector3 normal : normals)
+			transformedNormals.clear();
+			transformedNormals.reserve(normals.size());
+			for (const Vector3& normal : normals)
 			{
-				transformedPositions.emplace_back(finalTransform.TransformVector(normal));
+				transformedNormals.emplace_back(finalTransform.TransformVector(normal));
 			}
 		}
 	};
