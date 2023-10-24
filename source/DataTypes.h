@@ -84,6 +84,12 @@ namespace dae
 		Matrix translationTransform{};
 		Matrix scaleTransform{};
 
+		Vector3 minAABB;
+		Vector3 maxAABB;
+
+		Vector3 transformedMinAABB;
+		Vector3 transformedMaxAABB;
+
 		std::vector<Vector3> transformedPositions{};
 		std::vector<Vector3> transformedNormals{};
 
@@ -130,7 +136,22 @@ namespace dae
 				normals.push_back(Vector3::Cross(a, b));
 			}
 		}
-		
+
+		void UpdateAABB()
+		{
+			if (positions.size() > 0)
+			{
+				minAABB = positions[0];
+				maxAABB = positions[0];
+
+				for (const Vector3& p : positions)
+				{
+					minAABB = Vector3::Min(p, minAABB);
+					maxAABB = Vector3::Max(p, maxAABB);
+				}
+			}
+		}
+
 		void UpdateTransforms()
 		{
 			//Calculate Final Transform 
@@ -151,6 +172,15 @@ namespace dae
 			{
 				transformedNormals.emplace_back(finalTransform.TransformVector(normal));
 			}
+
+			UpdateTransformedAABB(finalTransform);
+		}
+
+
+		void UpdateTransformedAABB(const Matrix& finalTransform)
+		{
+			// transform all 8 vertices of aabb
+
 		}
 	};
 #pragma endregion
