@@ -99,8 +99,8 @@ namespace dae
 	class Material_CookTorrence final : public Material
 	{
 	public:
-		Material_CookTorrence(const ColorRGB& albedo, float metalness, float roughness):
-			m_Albedo(albedo), m_Metalness(metalness), m_Roughness(roughness)
+		Material_CookTorrence(const ColorRGB& albedo, float metalness, float roughness/*, int reflectionValue*/):
+			m_Albedo(albedo), m_Metalness(metalness), m_Roughness(roughness)/*, m_ReflectionValue(reflectionValue)*/
 		{
 		}
 
@@ -135,7 +135,14 @@ namespace dae
 			return {diffuse + specular};
 		}
 
+		//virtual const int GetReflectionValue() const
+		//{
+		//	return m_ReflectionValue;
+		//}
+
 	private:
+		//int m_ReflectionValue{ 1.f };
+
 		ColorRGB m_Albedo{0.955f, 0.637f, 0.538f}; //Copper
 		float m_Metalness{1.0f};
 		float m_Roughness{0.1f}; // [1.0 > 0.0] >> [ROUGH > SMOOTH]

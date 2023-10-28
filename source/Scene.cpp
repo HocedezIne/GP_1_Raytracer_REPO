@@ -312,7 +312,6 @@ namespace dae {
 		const auto matLambert_GrayBlue = AddMaterial(new Material_Lambert({ .49f, .57f, .57f }, 1.f));
 		const auto matLambert_White = AddMaterial(new Material_Lambert(colors::White, 1.f));
 
-		//Plane
 		AddPlane({ 0.f,  0.f, 10.f }, { 0.f,  0.f, -1.f }, matLambert_GrayBlue); //back
 		AddPlane({ 0.f,  0.f,  0.f }, { 0.f,  1.f,  0.f }, matLambert_GrayBlue); //bottom
 		AddPlane({ 0.f, 10.f,  0.f }, { 0.f, -1.f,  0.f }, matLambert_GrayBlue); //top
@@ -404,6 +403,7 @@ namespace dae {
 
 		const auto yawAngle = (cos(pTimer->GetTotal()) + 1.f) / 2.f * PI_2;
 		pBunny->RotateY(yawAngle);
+		//pBunny->UpdateAABB();
 		pBunny->UpdateTransforms();
 	}
 #pragma endregion

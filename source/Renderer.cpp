@@ -26,6 +26,7 @@ Renderer::Renderer(SDL_Window * pWindow) :
 void Renderer::Render(Scene* pScene) const
 {
 	Camera& camera = pScene->GetCamera();
+	const Matrix cameraToWorld{ camera.CalculateCameraToWorld() };
 
 	const float aspectRatio = m_Width / static_cast<float>(m_Height);
 	const float FOV = tanf((camera.fovAngle * TO_RADIANS) / 2);
@@ -42,13 +43,13 @@ void Renderer::Render(Scene* pScene) const
 	}
 
 	std::for_each(std::execution::par, pixelIndices.begin(), pixelIndices.end(), [&](int i) {
-		RenderPixel(pScene, i, FOV, aspectRatio, camera.CalculateCameraToWorld(), camera.origin);
+		RenderPixel(pScene, i, FOV, aspectRatio, cameraToWorld, camera.origin);
 		});
 #else
 	// synchronous
 	for (uint32_t pixelIndex {}; pixelIndex < amountOfPixels; pixelIndex++)
 	{
-		RenderPixel(pScene, pixelIndex, FOV, aspectRatio, camera.CalculateCameraToWorld(), camera.origin);
+		RenderPixel(pScene, pixelIndex, FOV, aspectRatio, cameraToWorld, camera.origin);
 	}
 #endif
 
@@ -74,54 +75,44 @@ void Renderer::RenderPixel(Scene* pScene, uint32_t pixelIndex, const float fov, 
 	Ray viewRay{ cameraOrigin, rayDirection };
 
 	ColorRGB finalColor{};
-	float bounceReflactionValue{ 0.5f };
+	HitRecord closestHit{};
 
-	for (int bounce{}; bounce < 2; ++bounce)
+	pScene->GetClosestHit(viewRay, closestHit);
+	if (closestHit.didHit)
 	{
-		HitRecord closestHit{};
-
-		pScene->GetClosestHit(viewRay, closestHit);
-		if (closestHit.didHit)
+		for (const Light& light : lights)
 		{
-			for (const Light& light : lights)
+			const Vector3 lightDirection{ LightUtils::GetDirectionToLight(light, closestHit.origin) };
+			Ray rayToLight{ closestHit.origin + closestHit.normal * 0.001f, lightDirection.Normalized() };
+			if (light.type == LightType::Point) rayToLight.max = lightDirection.Magnitude();
+			else rayToLight.max = FLT_MAX;
+
+			// Observed area calc + early escape
+			const float observedArea{ Vector3::Dot(closestHit.normal, lightDirection) / lightDirection.Magnitude() };
+			if (observedArea <= 0.f) continue;
+
+			// Shadows
+			if (pScene->DoesHit(rayToLight) && m_ShadowsEnabled) continue;
+
+
+			switch (m_CurrentLightingMode)
 			{
-				const Vector3 lightDirection{ LightUtils::GetDirectionToLight(light, closestHit.origin) };
-				Ray rayToLight{ closestHit.origin + closestHit.normal * 0.001f, lightDirection.Normalized() };
-				if (light.type == LightType::Point) rayToLight.max = lightDirection.Magnitude();
-				else rayToLight.max = FLT_MAX;
-
-				// Observed area calc + early escape
-				const float observedArea{ Vector3::Dot(closestHit.normal, lightDirection) / lightDirection.Magnitude() };
-				if (observedArea <= 0.f) continue;
-
-				// Shadows
-				if (pScene->DoesHit(rayToLight) && m_ShadowsEnabled) continue;
-
-
-				switch (m_CurrentLightingMode)
-				{
-				case dae::Renderer::LightingMode::ObservedArea:
-					finalColor += {observedArea, observedArea, observedArea};
-					break;
-				case dae::Renderer::LightingMode::Radience:
-					finalColor += LightUtils::GetRadiance(light, closestHit.origin);
-					break;
-				case dae::Renderer::LightingMode::BRDF:
-					finalColor += materials[closestHit.materialIndex]->Shade(closestHit, rayToLight.direction, -rayDirection);
-					break;
-				case dae::Renderer::LightingMode::Combined:
-					finalColor += LightUtils::GetRadiance(light, closestHit.origin) *
-						materials[closestHit.materialIndex]->Shade(closestHit, rayToLight.direction, -rayDirection) *
-						observedArea * bounceReflactionValue;
-					break;
-				}
+			case dae::Renderer::LightingMode::ObservedArea:
+				finalColor += {observedArea, observedArea, observedArea};
+				break;
+			case dae::Renderer::LightingMode::Radience:
+				finalColor += LightUtils::GetRadiance(light, closestHit.origin);
+				break;
+			case dae::Renderer::LightingMode::BRDF:
+				finalColor += materials[closestHit.materialIndex]->Shade(closestHit, rayToLight.direction, -rayDirection);
+				break;
+			case dae::Renderer::LightingMode::Combined:
+				finalColor += LightUtils::GetRadiance(light, closestHit.origin) *
+					materials[closestHit.materialIndex]->Shade(closestHit, rayToLight.direction, -rayDirection) *
+					observedArea;
+				break;
 			}
 		}
-
-		viewRay.direction = Vector3::Reflect(viewRay.direction, closestHit.normal);
-		viewRay.origin = closestHit.origin;
-
-		bounceReflactionValue /= 3;
 	}
 
 	//Update Color in Buffer

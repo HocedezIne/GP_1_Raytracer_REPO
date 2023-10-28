@@ -17,7 +17,7 @@ namespace dae
 			const Vector3 originToSphere{ sphere.origin - ray.origin };
 			const float originToSphereDot{ Vector3::Dot(originToSphere, ray.direction) };
 
-			const float discriminant = sphere.radius * sphere.radius - Vector3::Dot(originToSphere, originToSphere) + originToSphereDot * originToSphereDot;
+			const float discriminant = Square(sphere.radius) - Vector3::Dot(originToSphere, originToSphere) + Square(originToSphereDot);
 
 			if (discriminant <= 0) return false;
 
@@ -74,44 +74,41 @@ namespace dae
 		{
 			if (ignoreHitRecord) return false;
 
-			// normal vs raydirection check
-			const Vector3 a{ triangle.v1 - triangle.v0 };
-			const Vector3 b{ triangle.v2 - triangle.v1 };
-			const Vector3 triangleNormal{ Vector3::Cross(a,b) };
+			// Müller-Trombore - based on https://cadxfem.org/inf/Fast%20MinimumStorage%20RayTriangle%20Intersection.pdf
+			// triangle edges in v0
+			const Vector3 e1v0{ triangle.v1 - triangle.v0 };
+			const Vector3 e2v0{ triangle.v2 - triangle.v0 };
 
-			const float normalRayDot{ Vector3::Dot(triangleNormal, ray.direction) };
-			if (AreEqual(normalRayDot, 0)) return false; // ray is parrallel to triangle
+			// calc determinant
+			const Vector3 pvec{ Vector3::Cross(ray.direction, e2v0) };
+			const float determinant{ Vector3::Dot(e1v0, pvec) };
 
-			// cull mode check
-			if ( (normalRayDot > 0 && triangle.cullMode == TriangleCullMode::BackFaceCulling ) ||
-				 (normalRayDot < 0 && triangle.cullMode == TriangleCullMode::FrontFaceCulling) )
+			if ((determinant < 0.000001f && triangle.cullMode == TriangleCullMode::BackFaceCulling) ||
+				(determinant > -0.000001f && triangle.cullMode == TriangleCullMode::FrontFaceCulling))
 			{
 				return false;
 			}
 
-			// ray-plane test + t range check
-			const Vector3 L{ triangle.v0 - ray.origin };
+			const float inverseDeterminant{ 1 / determinant };
 
-			const float t{ Vector3::Dot(L, triangleNormal) / Vector3::Dot(ray.direction, triangleNormal) };
+			const Vector3 tvec{ ray.origin - triangle.v0 };
+			const float u{ Vector3::Dot(tvec, pvec) * inverseDeterminant };
+			if (u < 0 || u > 1) return false;
+
+			const Vector3 qvec{ Vector3::Cross(tvec, e1v0) };
+			const float v{ Vector3::Dot(ray.direction, qvec) * inverseDeterminant };
+			if (v < 0 || u + v > 1) return false;
+
+			const float t{ Vector3::Dot(e2v0, qvec) * inverseDeterminant };
+	
+			// check if t in limits
 			if (t < ray.min || t > ray.max) return false;
-
-			// check if hitpoint inside triangle
-			const Vector3 P{ ray.origin + ray.direction * t };
-
-			const std::vector<const Vector3*> triangleVerts = { &triangle.v0, &triangle.v1, &triangle.v2 };
-
-			for (int i = 0; i < 3; i++)
-			{
-				const Vector3 e{ *triangleVerts[(i+1)%3] - *triangleVerts[i]};
-				const Vector3 p{ P - *triangleVerts[i] };
-				if (Vector3::Dot(Vector3::Cross(e, p), triangleNormal) < 0) return false;
-			}
 
 			//hit record
 			hitRecord.didHit = true;
 			hitRecord.materialIndex = triangle.materialIndex;
-			hitRecord.normal = triangleNormal;
-			hitRecord.origin = P;
+			hitRecord.normal = (determinant >0) ? triangle.normal : -triangle.normal;
+			hitRecord.origin = (1.f-u-v)*triangle.v0 + u*triangle.v1 + v*triangle.v2;
 			hitRecord.t = t;
 
 			return true;
