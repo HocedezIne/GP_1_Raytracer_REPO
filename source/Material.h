@@ -110,7 +110,7 @@ namespace dae
 			const ColorRGB f0 = (AreEqual(m_Metalness, 0)) ? ColorRGB{ .04f, .04f, .04f } : m_Albedo;
 
 			// half vector
-			Vector3 h{ v.Normalized() + l.Normalized()};
+			Vector3 h{ v/*.Normalized()*/ + l/*.Normalized()*/};
 			h.Normalize();
 
 			// fresnel

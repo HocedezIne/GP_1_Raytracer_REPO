@@ -104,14 +104,14 @@ namespace dae
 			// calc determinant
 			const Vector3 pvec{ Vector3::Cross(ray.direction, e2v0) };
 			const float determinant{ Vector3::Dot(e1v0, pvec) };
+			
+			const float inverseDeterminant{ 1 / determinant };
 
 			if ((determinant < 0.000001f && triangle.cullMode == TriangleCullMode::BackFaceCulling) ||
 				(determinant > -0.000001f && triangle.cullMode == TriangleCullMode::FrontFaceCulling))
 			{
 				return false;
 			}
-
-			const float inverseDeterminant{ 1 / determinant };
 
 			const Vector3 tvec{ ray.origin - triangle.v0 };
 			const float u{ Vector3::Dot(tvec, pvec) * inverseDeterminant };
@@ -129,7 +129,7 @@ namespace dae
 			//hit record
 			hitRecord.didHit = true;
 			hitRecord.materialIndex = triangle.materialIndex;
-			hitRecord.normal = (determinant >0) ? triangle.normal : -triangle.normal;
+			hitRecord.normal = /*(determinant >0) ? triangle.normal : -triangle.normal*/ Vector3::Cross(e1v0,e2v0).Normalized();
 			hitRecord.origin = (1.f-u-v)*triangle.v0 + u*triangle.v1 + v*triangle.v2;
 			hitRecord.t = t;
 
@@ -153,7 +153,7 @@ namespace dae
 			Ray workingRay = ray;
 			for (int i{}; i < mesh.indices.size(); i+=3)
 			{
-				Triangle triangle{ mesh.transformedPositions[mesh.indices[i]], mesh.transformedPositions[mesh.indices[i + 1]], mesh.transformedPositions[mesh.indices[i + 2]] };
+				Triangle triangle{ mesh.transformedPositions[mesh.indices[i]], mesh.transformedPositions[mesh.indices[i + 1]], mesh.transformedPositions[mesh.indices[i + 2]], Vector3{} };
 				triangle.cullMode = mesh.cullMode;
 				triangle.materialIndex = mesh.materialIndex;
 
