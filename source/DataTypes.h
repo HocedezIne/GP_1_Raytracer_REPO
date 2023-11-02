@@ -240,14 +240,14 @@ namespace dae
 
 		virtual void GetBoundingBox(Vector3& minAABBGet, Vector3& maxAABBGet) override
 		{
-			minAABBGet = transformedMinAABB;
-			maxAABBGet = transformedMaxAABB;
+			minAABBGet = minAABB;
+			maxAABBGet = maxAABB;
 		}
 
 		virtual Vector3 GetOrigin() override
 		{
-			Vector3 difference{ transformedMaxAABB - transformedMinAABB };
-			return transformedMinAABB + (difference/2);
+			Vector3 difference{ maxAABB - minAABB };
+			return minAABB + (difference/2);
 		}
 	};
 #pragma endregion

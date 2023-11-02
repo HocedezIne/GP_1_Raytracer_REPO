@@ -6,8 +6,6 @@
 #include "vector"
 #include "DataTypes.h"
 #include <algorithm>
-#include "Utils.h"
-#include "stack"
 
 // used chatgtp and https://fileadmin.cs.lth.se/cs/Education/EDAN30/lectures/S2-bvh.pdf to understand this concept and write the code below
 
@@ -20,7 +18,6 @@ namespace dae
 		BVHNode* left{};
 		BVHNode* right{};
 		GeometryObj* object{};
-		bool isLeaf{ false };
 	};
 
 	class BVH
@@ -31,58 +28,6 @@ namespace dae
 			m_Root = BuildBVHTree(objects, 0, int(objects.size() - 1));
 		}
 
-		void GetClosestHit(const Ray& ray, HitRecord& closestHit)
-		{
-			HitRecord hit{};
-			float smallestT{ ray.max };
-			Ray workingRay = ray;
-
-			// node stack
-			std::stack<BVHNode*> nodeStack;
-			nodeStack.push(m_Root);
-
-			while (!nodeStack.empty())
-			{
-				BVHNode* currentNode = nodeStack.top();
-				nodeStack.pop();
-
-				// check if ray intersects boundingbox
-				if (GeometryUtils::SlabTest(currentNode->minAABB, currentNode->maxAABB, workingRay))
-				{
-					// if current node is a leaf node -> check for intersection with object here
-					// else add child nodes to the stack
-					if (currentNode->isLeaf)
-					{
-						if (Sphere* sphere = dynamic_cast<Sphere*>(currentNode->object))
-						{
-							if (GeometryUtils::HitTest_Sphere(*sphere, ray, hit))
-							{
-								closestHit = hit;
-								smallestT = hit.t;
-								workingRay.max = smallestT;
-							}
-											
-						}
-						else if (TriangleMesh* tMesh = dynamic_cast<TriangleMesh*>(currentNode->object))
-						{
-							if (GeometryUtils::HitTest_TriangleMesh(*tMesh, ray, hit))
-							{
-								closestHit = hit;
-								smallestT = hit.t;
-								workingRay.max = smallestT;
-							}
-						}
-					}
-					else
-					{
-						nodeStack.push(currentNode->left);
-						nodeStack.push(currentNode->right);
-					}
-				}
-			}
-		}
-
-	private:
 		BVHNode* BuildBVHTree(std::vector<GeometryObj*>& objects, int startIdx, int endIdx)
 		{
 			if (endIdx < 0) return nullptr;
@@ -92,7 +37,6 @@ namespace dae
 				BVHNode* leaf = new BVHNode;
 				leaf->object = objects[startIdx];
 				leaf->object->GetBoundingBox(leaf->minAABB, leaf->maxAABB);
-				leaf->isLeaf = true;
 				return leaf;
 			}
 			else // recursively build tree
@@ -110,19 +54,19 @@ namespace dae
 				{
 					std::sort(objects.begin() + startIdx, objects.begin() + endIdx, [](GeometryObj* a, GeometryObj* b) {
 						return a->GetOrigin().x < b->GetOrigin().x;
-						});
+					});
 				}
 				else if (y > z) // y axis longest edge
 				{
 					std::sort(objects.begin() + startIdx, objects.begin() + endIdx, [](GeometryObj* a, GeometryObj* b) {
 						return a->GetOrigin().y < b->GetOrigin().y;
-						});
+					});
 				}
 				else // z axis longest edge
 				{
 					std::sort(objects.begin() + startIdx, objects.begin() + endIdx, [](GeometryObj* a, GeometryObj* b) {
 						return a->GetOrigin().z < b->GetOrigin().z;
-						});
+					});
 				}
 
 				// split up objects and recall build function
@@ -134,6 +78,7 @@ namespace dae
 			}
 		}
 
+	private:
 		void GetSharedBoundingBox(std::vector<GeometryObj*>& objects, int startIdx, int endIdx, BVHNode*& node)
 		{
 			objects[startIdx]->GetBoundingBox(node->minAABB, node->maxAABB);

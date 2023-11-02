@@ -55,8 +55,6 @@ namespace dae
 		//Temp (Individual Triangle Testing)
 		std::vector<Triangle> m_Triangles{};
 
-		BVH* m_BVH{};
-
 		Camera m_Camera{};
 
 		Sphere* AddSphere(const Vector3& origin, float radius, unsigned char materialIndex = 0);
@@ -151,6 +149,7 @@ namespace dae
 
 	private:
 		TriangleMesh* m_Meshes[3]{};
+		BVH* m_BVH{};
 	};
 
 	// Bunny Scene
