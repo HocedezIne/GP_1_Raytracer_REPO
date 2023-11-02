@@ -7,12 +7,28 @@
 namespace dae
 {
 #pragma region GEOMETRY
-	struct Sphere
+	struct GeometryObj {
+		virtual void GetBoundingBox(Vector3& minAABB, Vector3& maxAABB) = 0;
+		virtual Vector3 GetOrigin() = 0;
+	};
+
+	struct Sphere : GeometryObj
 	{
 		Vector3 origin{};
 		float radius{};
 
 		unsigned char materialIndex{ 0 };
+
+		virtual void GetBoundingBox(Vector3& minAABB, Vector3& maxAABB) override
+		{
+			minAABB = origin - Vector3{ radius, radius, radius };
+			maxAABB = origin + Vector3{ radius, radius, radius };
+		}
+
+		virtual Vector3 GetOrigin() override
+		{
+			return origin;
+		}
 	};
 
 	struct Plane
@@ -54,7 +70,7 @@ namespace dae
 		unsigned char materialIndex{};
 	};
 
-	struct TriangleMesh
+	struct TriangleMesh : GeometryObj
 	{
 		TriangleMesh() = default;
 		TriangleMesh(const std::vector<Vector3>& _positions, const std::vector<int>& _indices, TriangleCullMode _cullMode):
@@ -220,6 +236,18 @@ namespace dae
 
 			transformedMinAABB = tMinAABB;
 			transformedMaxAABB = tMaxAABB;
+		}
+
+		virtual void GetBoundingBox(Vector3& minAABBGet, Vector3& maxAABBGet) override
+		{
+			minAABBGet = minAABB;
+			maxAABBGet = maxAABB;
+		}
+
+		virtual Vector3 GetOrigin() override
+		{
+			Vector3 difference{ maxAABB - minAABB };
+			return minAABB + (difference/2);
 		}
 	};
 #pragma endregion
