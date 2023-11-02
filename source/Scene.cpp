@@ -42,45 +42,30 @@ namespace dae {
 			}
 		}
 
-		//for (const GeometryObj* object : m_GeometryObjects)
-		//{
-		//	if (const Sphere* sphere = dynamic_cast<const Sphere*>(object))
-		//	{
-		//		if (GeometryUtils::HitTest_Sphere(*sphere, workingRay, hit) && hit.t < smallestT)
-		//		{
-		//			closestHit = hit;
-		//			smallestT = hit.t;
-		//			workingRay.max = smallestT;
-		//		}
-		//	}
-		//	else if (const TriangleMesh* triangleMesh = dynamic_cast<const TriangleMesh*>(object))
-		//	{
-		//		if (GeometryUtils::HitTest_TriangleMesh(*triangleMesh, workingRay, hit) && hit.t < smallestT)
-		//		{
-		//			closestHit = hit;
-		//			smallestT = hit.t;
-		//			workingRay.max = smallestT;
-		//		}
-		//	}
-		//}
-
-		for (const auto& triangleMesh : m_TriangleMeshGeometries)
+		if (m_BVH != nullptr)
 		{
-			if (GeometryUtils::HitTest_TriangleMesh(triangleMesh, workingRay, hit) && hit.t < smallestT)
-			{
-				closestHit = hit;
-				smallestT = hit.t;
-				workingRay.max = smallestT;
-				}
+			m_BVH->GetClosestHit(ray, closestHit);
 		}
-
-		for (const auto& sphere : m_SphereGeometries)
+		else
 		{
-			if (GeometryUtils::HitTest_Sphere(sphere, workingRay, hit) && hit.t < smallestT)
+			for (const auto& triangleMesh : m_TriangleMeshGeometries)
 			{
-				closestHit = hit;
-				smallestT = hit.t;
-				workingRay.max = smallestT;
+				if (GeometryUtils::HitTest_TriangleMesh(triangleMesh, workingRay, hit) && hit.t < smallestT)
+				{
+					closestHit = hit;
+					smallestT = hit.t;
+					workingRay.max = smallestT;
+				}
+			}
+
+			for (const auto& sphere : m_SphereGeometries)
+			{
+				if (GeometryUtils::HitTest_Sphere(sphere, workingRay, hit) && hit.t < smallestT)
+				{
+					closestHit = hit;
+					smallestT = hit.t;
+					workingRay.max = smallestT;
+				}
 			}
 		}
 	}
@@ -96,24 +81,6 @@ namespace dae {
 				return true;
 			}
 		}
-
-		//for (const GeometryObj* object : m_GeometryObjects)
-		//{
-		//	if (const Sphere* sphere = dynamic_cast<const Sphere*>(object))
-		//	{
-		//		if (GeometryUtils::HitTest_Sphere(*sphere, ray, hit))
-		//		{
-		//			return true;
-		//		}
-		//	}
-		//	else if (const TriangleMesh* triangleMesh = dynamic_cast<const TriangleMesh*>(object))
-		//	{
-		//		if (GeometryUtils::HitTest_TriangleMesh(*triangleMesh, ray, hit))
-		//		{
-		//			return true;
-		//		}
-		//	}
-		//}
 
 		for (const auto& triangleMesh : m_TriangleMeshGeometries)
 		{

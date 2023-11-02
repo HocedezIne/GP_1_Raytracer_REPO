@@ -121,22 +121,22 @@ namespace dae
 		}
 #pragma endregion
 #pragma region TriangeMesh HitTest
-		inline bool SlabTest_TriangleMesh(const TriangleMesh& mesh, const Ray& ray)
+		inline bool SlabTest(const Vector3& minAABB, const Vector3& maxAABB, const Ray& ray)
 		{
-			const float tx1{ (mesh.transformedMinAABB.x - ray.origin.x) / ray.direction.x };
-			const float tx2{ (mesh.transformedMaxAABB.x - ray.origin.x) / ray.direction.x };
+			const float tx1{ (minAABB.x - ray.origin.x) / ray.direction.x };
+			const float tx2{ (maxAABB.x - ray.origin.x) / ray.direction.x };
 
 			float tmin = std::min(tx1, tx2);
 			float tmax = std::max(tx1, tx2);
 
-			const float ty1{ (mesh.transformedMinAABB.y - ray.origin.y) / ray.direction.y };
-			const float ty2{ (mesh.transformedMaxAABB.y - ray.origin.y) / ray.direction.y };
+			const float ty1{ (minAABB.y - ray.origin.y) / ray.direction.y };
+			const float ty2{ (maxAABB.y - ray.origin.y) / ray.direction.y };
 
 			tmin = std::max(tmin, std::min(ty1, ty2));
 			tmax = std::min(tmax, std::max(ty1, ty2));
 
-			const float tz1{ (mesh.transformedMinAABB.z - ray.origin.z) / ray.direction.z };
-			const float tz2{ (mesh.transformedMaxAABB.z - ray.origin.z) / ray.direction.z };
+			const float tz1{ (minAABB.z - ray.origin.z) / ray.direction.z };
+			const float tz2{ (maxAABB.z - ray.origin.z) / ray.direction.z };
 
 			tmin = std::max(tmin, std::min(tz1, tz2));
 			tmax = std::min(tmax, std::max(tz1, tz2));
@@ -149,7 +149,7 @@ namespace dae
 			if (ignoreHitRecord) return false;
 
 			// slabtest
-			if (!SlabTest_TriangleMesh(mesh, ray)) return false;
+			if (!SlabTest(mesh.transformedMinAABB, mesh.transformedMaxAABB, ray)) return false;
 
 			Ray workingRay = ray;
 			for (int i{}; i < mesh.indices.size(); i+=3)
