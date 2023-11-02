@@ -5,7 +5,6 @@
 #include "Math.h"
 #include "DataTypes.h"
 #include "Camera.h"
-#include "BVH.h"
 
 namespace dae
 {
@@ -149,7 +148,6 @@ namespace dae
 
 	private:
 		TriangleMesh* m_Meshes[3]{};
-		BVH* m_BVH{};
 	};
 
 	// Bunny Scene
