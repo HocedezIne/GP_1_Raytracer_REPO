@@ -36,17 +36,25 @@ namespace dae
 		{
 			if (ignoreHitRecord) return false;
 
-			const Vector3 originToSphere{ sphere.origin - ray.origin };
-			const float originToSphereDot{ Vector3::Dot(originToSphere, ray.direction) };
+			// const Vector3 originToOrigin{ ray.origin - sphere.origin };
+			//const float originToOriginDot{ Vector3::Dot(originToOrigin, originToOrigin) };
+			const Vector3 originToOrigin{ sphere.origin - ray.origin };
+			const float originToOriginDot{ Vector3::Dot(originToOrigin, ray.direction) };
 
-			const float discriminant = Square(sphere.radius) - Vector3::Dot(originToSphere, originToSphere) + Square(originToSphereDot);
+			//const float b{ Vector3::Dot(ray.direction, originToOrigin) * 2 };
+			//const float c{ originToOriginDot - Square(sphere.radius) };
+
+			//const float discriminant{ Square(b) - 4 * c };
+			const float discriminant = Square(sphere.radius) - Vector3::Dot(originToOrigin, originToOrigin) + Square(originToOriginDot);
 
 			if (discriminant <= 0) return false;
 
-			const float tHC{ sqrtf(discriminant) };
-
-			const float t0{ originToSphereDot - tHC};
-			const float t1{ originToSphereDot + tHC};
+			//const float root{ sqrtf(discriminant) };
+			//const float t0{ (-b - root) / 2 };
+			//const float t1{ (-b + root) / 2 };
+			const float tHC{ sqrt(discriminant) };
+			const float t0{ originToOriginDot - tHC };
+			const float t1{ originToOriginDot + tHC };
 			if (t0 < ray.min || t1 > ray.max) return false;
 
 			hitRecord.didHit = true;
@@ -69,7 +77,11 @@ namespace dae
 		{
 			if (ignoreHitRecord) return false;
 
-			const float t = Vector3::Dot(plane.origin - ray.origin, plane.normal) / Vector3::Dot(ray.direction, plane.normal);
+			//const float DotNormal{ Vector3::Dot(ray.direction, plane.normal) };
+
+			//if (AreEqual(DotNormal, 0)) return false;
+
+			const float t = Vector3::Dot(plane.origin - ray.origin, plane.normal) / /*DotNormal*/ Vector3::Dot(ray.direction, plane.normal);
 
 			if (t > ray.min && t < ray.max)
 			{
@@ -101,17 +113,30 @@ namespace dae
 			const Vector3 e1v0{ triangle.v1 - triangle.v0 };
 			const Vector3 e2v0{ triangle.v2 - triangle.v0 };
 
+			//// TODO: cullmode with normal
+			//// calc determinant
+			//const Vector3 pvec{ Vector3::Cross(ray.direction, e2v0) };
+			//const float determinant{ Vector3::Dot(e1v0, pvec) };
+			//
+			//const float inverseDeterminant{ 1 / determinant };
+			//// TODO use abs of determinant
+			//if (determinant < 0 && triangle.cullMode == TriangleCullMode::BackFaceCulling) return false;
+			//if (determinant > 0 && triangle.cullMode == TriangleCullMode::FrontFaceCulling) return false;
+
+			// TODO: cullmode with normal
+			const Vector3 n{ Vector3::Cross(e1v0, e2v0) };
+			const float normalRayDot{ Vector3::Dot(n, ray.direction) };
+			if (AreEqual(normalRayDot, 0)) return false; // ray is parrallel to triangle
+			if ((normalRayDot > 0 && triangle.cullMode == TriangleCullMode::BackFaceCulling) ||
+				(normalRayDot < 0 && triangle.cullMode == TriangleCullMode::FrontFaceCulling)) return false;
+
 			// calc determinant
 			const Vector3 pvec{ Vector3::Cross(ray.direction, e2v0) };
 			const float determinant{ Vector3::Dot(e1v0, pvec) };
-			
-			const float inverseDeterminant{ 1 / determinant };
 
-			if ((determinant < 0.000001f && triangle.cullMode == TriangleCullMode::BackFaceCulling) ||
-				(determinant > -0.000001f && triangle.cullMode == TriangleCullMode::FrontFaceCulling))
-			{
-				return false;
-			}
+			if (abs(determinant) < 1e-6f) return false;
+
+			const float inverseDeterminant{ 1 / determinant };
 
 			const Vector3 tvec{ ray.origin - triangle.v0 };
 			const float u{ Vector3::Dot(tvec, pvec) * inverseDeterminant };
@@ -129,9 +154,9 @@ namespace dae
 			//hit record
 			hitRecord.didHit = true;
 			hitRecord.materialIndex = triangle.materialIndex;
-			hitRecord.normal = /*(determinant >0) ? triangle.normal : -triangle.normal*/ Vector3::Cross(e1v0,e2v0).Normalized();
-			hitRecord.origin = (1.f-u-v)*triangle.v0 + u*triangle.v1 + v*triangle.v2;
+			hitRecord.normal = n.Normalized();
 			hitRecord.t = t;
+			hitRecord.origin = ray.origin + t * ray.direction;
 
 			return true;
 		}
@@ -165,7 +190,6 @@ namespace dae
 			
 			if (!hitRecord.didHit) return false;
 
-			hitRecord.materialIndex = mesh.materialIndex;
 			return true;
 		}
 
