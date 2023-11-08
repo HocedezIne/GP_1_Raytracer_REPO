@@ -42,9 +42,9 @@ namespace dae {
 			}
 		}
 
-		for (const TriangleMesh& triangleMesh : m_TriangleMeshGeometries)
+		for (const Sphere& sphere : m_SphereGeometries)
 		{
-			if (GeometryUtils::HitTest_TriangleMesh(triangleMesh, workingRay, hit) && hit.t < smallestT)
+			if (GeometryUtils::HitTest_Sphere(sphere, workingRay, hit) && hit.t < smallestT)
 			{
 				closestHit = hit;
 				smallestT = hit.t;
@@ -52,9 +52,9 @@ namespace dae {
 			}
 		}
 
-		for (const Sphere& sphere : m_SphereGeometries)
+		for (const TriangleMesh& triangleMesh : m_TriangleMeshGeometries)
 		{
-			if (GeometryUtils::HitTest_Sphere(sphere, workingRay, hit) && hit.t < smallestT)
+			if (GeometryUtils::HitTest_TriangleMesh(triangleMesh, workingRay, hit) && hit.t < smallestT)
 			{
 				closestHit = hit;
 				smallestT = hit.t;
@@ -69,15 +69,7 @@ namespace dae {
 
 		for (const Plane& plane : m_PlaneGeometries)
 		{
-			if (GeometryUtils::HitTest_Plane(plane, ray, hit))
-			{
-				return true;
-			}
-		}
-
-		for (const TriangleMesh& triangleMesh : m_TriangleMeshGeometries)
-		{
-			if (GeometryUtils::HitTest_TriangleMesh(triangleMesh, ray, hit))
+			if (GeometryUtils::HitTest_Plane(plane, ray, hit, true))
 			{
 				return true;
 			}
@@ -85,7 +77,15 @@ namespace dae {
 
 		for (const Sphere& sphere : m_SphereGeometries)
 		{
-			if (GeometryUtils::HitTest_Sphere(sphere, ray, hit))
+			if (GeometryUtils::HitTest_Sphere(sphere, ray, hit, true))
+			{
+				return true;
+			}
+		}
+
+		for (const TriangleMesh& triangleMesh : m_TriangleMeshGeometries)
+		{
+			if (GeometryUtils::HitTest_TriangleMesh(triangleMesh, ray, hit, true))
 			{
 				return true;
 			}
@@ -386,7 +386,6 @@ namespace dae {
 						pBunny->normals, pBunny->indices);
 
 		pBunny->Scale({ 2.f, 2.f, 2.f });
-		pBunny->Translate({ 0.f,1.f,0.f });
 
 		pBunny->UpdateAABB();
 		pBunny->UpdateTransforms();
