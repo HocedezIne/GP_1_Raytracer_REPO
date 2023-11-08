@@ -12,33 +12,30 @@ namespace dae
 		//SPHERE HIT-TESTS
 		inline bool HitTest_Sphere(const Sphere& sphere, const Ray& ray, HitRecord& hitRecord, bool ignoreHitRecord = false)
 		{
-			// const Vector3 originToOrigin{ ray.origin - sphere.origin };
-			//const float originToOriginDot{ Vector3::Dot(originToOrigin, originToOrigin) };
 			const Vector3 originToOrigin{ sphere.origin - ray.origin };
 			const float originToOriginDot{ Vector3::Dot(originToOrigin, ray.direction) };
 
-			//const float b{ Vector3::Dot(ray.direction, originToOrigin) * 2 };
-			//const float c{ originToOriginDot - Square(sphere.radius) };
-
-			//const float discriminant{ Square(b) - 4 * c };
 			const float discriminant = Square(sphere.radius) - Vector3::Dot(originToOrigin, originToOrigin) + Square(originToOriginDot);
 
 			if (discriminant <= 0) return false;
 
-			//const float root{ sqrtf(discriminant) };
-			//const float t0{ (-b - root) / 2 };
-			//const float t1{ (-b + root) / 2 };
 			const float tHC{ sqrt(discriminant) };
 			const float t0{ originToOriginDot - tHC };
 			const float t1{ originToOriginDot + tHC };
-			if (t0 < ray.min || t1 > ray.max) return false;
+
+			if (t0 < ray.min)
+			{
+				if (t1 < ray.min || t1 > ray.max) return false;
+				hitRecord.t = t1;
+			}
+			else if (t0 > ray.max) return false;
+			else hitRecord.t = t0;
 
 			if (ignoreHitRecord) return true;
 
 			hitRecord.didHit = true;
 			hitRecord.materialIndex = sphere.materialIndex;
-			hitRecord.t = t0;
-			hitRecord.origin = ray.origin + t0 * ray.direction;
+			hitRecord.origin = ray.origin + hitRecord.t * ray.direction;
 			hitRecord.normal = (hitRecord.origin - sphere.origin).Normalized();
 			return true;
 		}
@@ -53,11 +50,7 @@ namespace dae
 		//PLANE HIT-TESTS
 		inline bool HitTest_Plane(const Plane& plane, const Ray& ray, HitRecord& hitRecord, bool ignoreHitRecord = false)
 		{
-			//const float DotNormal{ Vector3::Dot(ray.direction, plane.normal) };
-
-			//if (AreEqual(DotNormal, 0)) return false;
-
-			const float t = Vector3::Dot(plane.origin - ray.origin, plane.normal) / /*DotNormal*/ Vector3::Dot(ray.direction, plane.normal);
+			const float t = Vector3::Dot(plane.origin - ray.origin, plane.normal) / Vector3::Dot(ray.direction, plane.normal);
 
 			if (t > ray.min && t < ray.max)
 			{
@@ -88,17 +81,6 @@ namespace dae
 			const Vector3 e1v0{ triangle.v1 - triangle.v0 };
 			const Vector3 e2v0{ triangle.v2 - triangle.v0 };
 
-			//// TODO: cullmode with normal
-			//// calc determinant
-			//const Vector3 pvec{ Vector3::Cross(ray.direction, e2v0) };
-			//const float determinant{ Vector3::Dot(e1v0, pvec) };
-			//
-			//const float inverseDeterminant{ 1 / determinant };
-			//// TODO use abs of determinant
-			//if (determinant < 0 && triangle.cullMode == TriangleCullMode::BackFaceCulling) return false;
-			//if (determinant > 0 && triangle.cullMode == TriangleCullMode::FrontFaceCulling) return false;
-
-			// TODO: cullmode with normal
 			const Vector3 n{ Vector3::Cross(e1v0, e2v0) };
 			const float normalRayDot{ Vector3::Dot(n, ray.direction) };
 			if (AreEqual(normalRayDot, 0)) return false; // ray is parrallel to triangle

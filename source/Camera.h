@@ -61,7 +61,7 @@ namespace dae
 			int mouseX{}, mouseY{};
 			const uint32_t mouseState = SDL_GetRelativeMouseState(&mouseX, &mouseY);
 
-			// Movement
+			// Keyboard
 			if (pKeyboardState[SDL_SCANCODE_W])
 			{
 				origin.z += movementSpeed * deltaTime;
@@ -83,13 +83,31 @@ namespace dae
 				updateONB = true;
 			}
 
-			// Rotation
-			if (mouseState & SDL_BUTTON(SDL_BUTTON_LEFT))
+			// Mouse
+			if (mouseState & SDL_BUTTON(SDL_BUTTON_RIGHT) && mouseState & SDL_BUTTON(SDL_BUTTON_LEFT)) // move world up/down
+			{
+				origin.y += mouseX * movementSpeed * deltaTime;
+				updateONB = true;
+			}
+			else if (mouseState & SDL_BUTTON(SDL_BUTTON_RIGHT)) // rotate yaw and pitch
 			{
 				const float totalYaw { (mouseX * deltaTime) / 2 };
 				const float totalPitch {(mouseY * deltaTime) / 2};
 
 				Matrix rotation = Matrix::CreateRotation(totalPitch, totalYaw, 0);
+				forward = rotation.TransformVector(forward);
+				forward.Normalize();
+
+				updateONB = true;
+			}
+			else if (mouseState & SDL_BUTTON(SDL_BUTTON_LEFT))
+			{
+				origin.z -= mouseY * movementSpeed * deltaTime; // move foward/backward
+
+				// rotate yaw
+				const float totalYaw{ (mouseX * deltaTime) / 2 };
+
+				Matrix rotation = Matrix::CreateRotation(0, totalYaw, 0);
 				forward = rotation.TransformVector(forward);
 				forward.Normalize();
 

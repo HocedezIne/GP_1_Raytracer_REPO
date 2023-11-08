@@ -382,7 +382,7 @@ namespace dae {
 		AddPlane({ -5.f,  0.f,  0.f }, { 1.f,  0.f,  0.f }, matLambert_GrayBlue); //left
 
 		pBunny = AddTriangleMesh(TriangleCullMode::NoCulling, matLambert_White);
-		Utils::ParseOBJ("Resources/lowpoly_bunny.obj", pBunny->positions,
+		Utils::ParseOBJ("Resources/lowpoly_bunny2.obj", pBunny->positions,
 						pBunny->normals, pBunny->indices);
 
 		pBunny->Scale({ 2.f, 2.f, 2.f });
@@ -402,8 +402,62 @@ namespace dae {
 
 		const auto yawAngle = (cos(pTimer->GetTotal()) + 1.f) / 2.f * PI_2;
 		pBunny->RotateY(yawAngle);
-		//pBunny->UpdateAABB();
 		pBunny->UpdateTransforms();
+	}
+#pragma endregion
+
+#pragma region EXTRA SCENE
+	void Scene_ExtraScene::Initialize()
+	{
+		sceneName = "Extra Scene";
+		m_Camera.origin = { 0.f, 3.f, -9.f };
+		m_Camera.fovAngle = 45.f;
+
+		const auto matLambert_GrayBlue = AddMaterial(new Material_Lambert({ .49f, .57f, .57f }, 1.f));
+		const auto matLambert_White = AddMaterial(new Material_Lambert(colors::White, 1.f));
+
+		//Plane
+		AddPlane({ 0.f,  0.f, 10.f }, { 0.f,  0.f, -1.f }, matLambert_GrayBlue); //back
+		AddPlane({ 0.f,  0.f,  0.f }, { 0.f,  1.f,  0.f }, matLambert_GrayBlue); //bottom
+		AddPlane({ 0.f, 10.f,  0.f }, { 0.f, -1.f,  0.f }, matLambert_GrayBlue); //top
+		AddPlane({ 5.f,  0.f,  0.f }, { -1.f,  0.f,  0.f }, matLambert_GrayBlue); //right
+		AddPlane({ -5.f,  0.f,  0.f }, { 1.f,  0.f,  0.f }, matLambert_GrayBlue); //left
+
+		pBottle = AddTriangleMesh(TriangleCullMode::BackFaceCulling, matLambert_White);
+		Utils::ParseOBJ("Resources/winebottle.obj", pBottle->positions,
+			pBottle->normals, pBottle->indices);
+
+		pBottle->Scale({ 2.f, 2.f, 2.f });
+
+		pBottle->UpdateAABB();
+		pBottle->UpdateTransforms();
+		
+		
+		pGlass = AddTriangleMesh(TriangleCullMode::BackFaceCulling, matLambert_White);
+		Utils::ParseOBJ("Resources/wineglass.obj", pGlass->positions,
+			pGlass->normals, pGlass->indices);
+
+		pGlass->Scale({ 2.f, 2.f, 2.f });
+
+		pGlass->UpdateAABB();
+		pGlass->UpdateTransforms();
+
+		//Light
+		AddPointLight({ 0.f, 5.f, 5.f }, 50.f, ColorRGB{ 1.f,.61f,.45f }); //backlight
+		AddPointLight({ -2.5f, 5.f, -5.f }, 70.f, ColorRGB{ 1.f,.8f,.45f }); //front left
+		AddPointLight({ 2.5f, 2.5f, -5.f }, 50.f, ColorRGB{ .34f,.47f,.68f }); //front right
+	}
+
+	void Scene_ExtraScene::Update(Timer* pTimer)
+	{
+		Scene::Update(pTimer);
+
+		const auto yawAngle = (cos(pTimer->GetTotal()) + 1.f) / 2.f * PI_2;
+		pBottle->RotateY(yawAngle);
+		pBottle->UpdateTransforms();
+
+		pGlass->RotateY(yawAngle);
+		pGlass->UpdateTransforms();
 	}
 #pragma endregion
 }
