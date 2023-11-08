@@ -39,6 +39,7 @@ namespace dae
 		{
 			if (updateONB)
 			{
+				forward.Normalize();
 				right = Vector3::Cross(Vector3::UnitY, forward);
 				right.Normalize();
 				up = Vector3::Cross(forward, right);
@@ -64,29 +65,29 @@ namespace dae
 			// Keyboard
 			if (pKeyboardState[SDL_SCANCODE_W])
 			{
-				origin.z += movementSpeed * deltaTime;
+				origin += forward * movementSpeed * deltaTime;
 				updateONB = true;
 			}
 			if (pKeyboardState[SDL_SCANCODE_S])
 			{
-				origin.z -= movementSpeed * deltaTime;
+				origin -= forward * movementSpeed * deltaTime;
 				updateONB = true;
 			}
 			if (pKeyboardState[SDL_SCANCODE_D])
 			{
-				origin.x += movementSpeed * deltaTime;
+				origin += right * movementSpeed * deltaTime;
 				updateONB = true;
 			}
 			if (pKeyboardState[SDL_SCANCODE_A])
 			{
-				origin.x -= movementSpeed * deltaTime;
+				origin -= right * movementSpeed * deltaTime;
 				updateONB = true;
 			}
 
 			// Mouse
 			if (mouseState & SDL_BUTTON(SDL_BUTTON_RIGHT) && mouseState & SDL_BUTTON(SDL_BUTTON_LEFT)) // move world up/down
 			{
-				origin.y += mouseX * movementSpeed * deltaTime;
+				origin -= up * mouseY * movementSpeed * deltaTime;
 				updateONB = true;
 			}
 			else if (mouseState & SDL_BUTTON(SDL_BUTTON_RIGHT)) // rotate yaw and pitch
@@ -96,20 +97,18 @@ namespace dae
 
 				Matrix rotation = Matrix::CreateRotation(totalPitch, totalYaw, 0);
 				forward = rotation.TransformVector(forward);
-				forward.Normalize();
 
 				updateONB = true;
 			}
 			else if (mouseState & SDL_BUTTON(SDL_BUTTON_LEFT))
 			{
-				origin.z -= mouseY * movementSpeed * deltaTime; // move foward/backward
+				origin -= forward * mouseY * movementSpeed * deltaTime; // move foward/backward
 
 				// rotate yaw
 				const float totalYaw{ (mouseX * deltaTime) / 2 };
 
 				Matrix rotation = Matrix::CreateRotation(0, totalYaw, 0);
 				forward = rotation.TransformVector(forward);
-				forward.Normalize();
 
 				updateONB = true;
 			}
