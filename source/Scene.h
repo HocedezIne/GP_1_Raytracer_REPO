@@ -168,24 +168,4 @@ namespace dae
 	private:
 		TriangleMesh* pBunny{nullptr};
 	};
-
-	// extra Scene
-	class Scene_ExtraScene final : public Scene
-	{
-	public:
-		Scene_ExtraScene() = default;
-		~Scene_ExtraScene() override = default;
-
-		Scene_ExtraScene(const Scene_ExtraScene&) = delete;
-		Scene_ExtraScene(Scene_ExtraScene&&) noexcept = delete;
-		Scene_ExtraScene& operator=(const Scene_ExtraScene&) = delete;
-		Scene_ExtraScene& operator=(Scene_ExtraScene&&) noexcept = delete;
-
-		void Initialize() override;
-		void Update(Timer* pTimer) override;
-
-	private:
-		TriangleMesh* pBottle{ nullptr };
-		TriangleMesh* pGlass{ nullptr };
-	};
 }

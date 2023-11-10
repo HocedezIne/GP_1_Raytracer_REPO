@@ -87,13 +87,13 @@ namespace dae
 			// Mouse
 			if (mouseState & SDL_BUTTON(SDL_BUTTON_RIGHT) && mouseState & SDL_BUTTON(SDL_BUTTON_LEFT)) // move world up/down
 			{
-				origin -= up * mouseY * movementSpeed * deltaTime;
+				origin -= up * float(mouseY) * movementSpeed * deltaTime;
 				updateONB = true;
 			}
 			else if (mouseState & SDL_BUTTON(SDL_BUTTON_RIGHT)) // rotate yaw and pitch
 			{
-				const float totalYaw { (mouseX * deltaTime) / 2 };
-				const float totalPitch {(mouseY * deltaTime) / 2};
+				const float totalYaw{ (float(mouseX) * deltaTime) / 2 };
+				const float totalPitch {(float(mouseY) * deltaTime) / 2};
 
 				Matrix rotation = Matrix::CreateRotation(totalPitch, totalYaw, 0);
 				forward = rotation.TransformVector(forward);
@@ -102,10 +102,10 @@ namespace dae
 			}
 			else if (mouseState & SDL_BUTTON(SDL_BUTTON_LEFT))
 			{
-				origin -= forward * mouseY * movementSpeed * deltaTime; // move foward/backward
+				origin -= forward * float(mouseY) * movementSpeed * deltaTime; // move foward/backward
 
 				// rotate yaw
-				const float totalYaw{ (mouseX * deltaTime) / 2 };
+				const float totalYaw{ (float(mouseX) * deltaTime) / 2 };
 
 				Matrix rotation = Matrix::CreateRotation(0, totalYaw, 0);
 				forward = rotation.TransformVector(forward);
