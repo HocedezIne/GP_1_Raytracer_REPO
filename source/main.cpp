@@ -33,7 +33,7 @@ int main(int argc, char* args[])
 	const uint32_t height = 480;
 
 	SDL_Window* pWindow = SDL_CreateWindow(
-		"RayTracer - Ine Hocedez",
+		"RayTracer - Ine Hocedez (2DAE10)",
 		SDL_WINDOWPOS_UNDEFINED,
 		SDL_WINDOWPOS_UNDEFINED,
 		width, height, 0);
@@ -73,6 +73,7 @@ int main(int argc, char* args[])
 					takeScreenshot = true;
 				if (e.key.keysym.scancode == SDL_SCANCODE_F2) pRenderer->ToggleShadows();
 				if (e.key.keysym.scancode == SDL_SCANCODE_F3) pRenderer->CycleLightingMode();
+				if (e.key.keysym.scancode == SDL_SCANCODE_F6) pTimer->StartBenchmark();
 				break;
 			}
 		}

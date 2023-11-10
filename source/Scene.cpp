@@ -42,9 +42,9 @@ namespace dae {
 			}
 		}
 
-		for (const TriangleMesh& triangleMesh : m_TriangleMeshGeometries)
+		for (const auto& sphere : m_SphereGeometries)
 		{
-			if (GeometryUtils::HitTest_TriangleMesh(triangleMesh, workingRay, hit) && hit.t < smallestT)
+			if (GeometryUtils::HitTest_Sphere(sphere, workingRay, hit) && hit.t < smallestT)
 			{
 				closestHit = hit;
 				smallestT = hit.t;
@@ -52,9 +52,9 @@ namespace dae {
 			}
 		}
 
-		for (const Sphere& sphere : m_SphereGeometries)
+		for (const auto& triangleMesh : m_TriangleMeshGeometries)
 		{
-			if (GeometryUtils::HitTest_Sphere(sphere, workingRay, hit) && hit.t < smallestT)
+			if (GeometryUtils::HitTest_TriangleMesh(triangleMesh, workingRay, hit) && hit.t < smallestT)
 			{
 				closestHit = hit;
 				smallestT = hit.t;
@@ -69,15 +69,7 @@ namespace dae {
 
 		for (const Plane& plane : m_PlaneGeometries)
 		{
-			if (GeometryUtils::HitTest_Plane(plane, ray, hit))
-			{
-				return true;
-			}
-		}
-
-		for (const TriangleMesh& triangleMesh : m_TriangleMeshGeometries)
-		{
-			if (GeometryUtils::HitTest_TriangleMesh(triangleMesh, ray, hit))
+			if (GeometryUtils::HitTest_Plane(plane, ray, hit, true))
 			{
 				return true;
 			}
@@ -85,7 +77,15 @@ namespace dae {
 
 		for (const Sphere& sphere : m_SphereGeometries)
 		{
-			if (GeometryUtils::HitTest_Sphere(sphere, ray, hit))
+			if (GeometryUtils::HitTest_Sphere(sphere, ray, hit, true))
+			{
+				return true;
+			}
+		}
+
+		for (const TriangleMesh& triangleMesh : m_TriangleMeshGeometries)
+		{
+			if (GeometryUtils::HitTest_TriangleMesh(triangleMesh, ray, hit, true))
 			{
 				return true;
 			}
@@ -312,7 +312,6 @@ namespace dae {
 		const auto matLambert_GrayBlue = AddMaterial(new Material_Lambert({ .49f, .57f, .57f }, 1.f));
 		const auto matLambert_White = AddMaterial(new Material_Lambert(colors::White, 1.f));
 
-		//Plane
 		AddPlane({ 0.f,  0.f, 10.f }, { 0.f,  0.f, -1.f }, matLambert_GrayBlue); //back
 		AddPlane({ 0.f,  0.f,  0.f }, { 0.f,  1.f,  0.f }, matLambert_GrayBlue); //bottom
 		AddPlane({ 0.f, 10.f,  0.f }, { 0.f, -1.f,  0.f }, matLambert_GrayBlue); //top
@@ -331,16 +330,19 @@ namespace dae {
 		m_Meshes[0] = AddTriangleMesh(TriangleCullMode::BackFaceCulling, matLambert_White);
 		m_Meshes[0]->AppendTriangle(baseTriangle, true);
 		m_Meshes[0]->Translate({ -1.75f,4.5f,0.f });
+		m_Meshes[0]->UpdateAABB();
 		m_Meshes[0]->UpdateTransforms();
 
 		m_Meshes[1] = AddTriangleMesh(TriangleCullMode::FrontFaceCulling, matLambert_White);
 		m_Meshes[1]->AppendTriangle(baseTriangle, true);
 		m_Meshes[1]->Translate({ 0.f,4.5f,0.f });
+		m_Meshes[1]->UpdateAABB();
 		m_Meshes[1]->UpdateTransforms();
 
 		m_Meshes[2] = AddTriangleMesh(TriangleCullMode::NoCulling, matLambert_White);
 		m_Meshes[2]->AppendTriangle(baseTriangle, true);
 		m_Meshes[2]->Translate({ 1.75f,4.5f,0.f });
+		m_Meshes[2]->UpdateAABB();
 		m_Meshes[2]->UpdateTransforms();
 
 		//Light
@@ -380,12 +382,12 @@ namespace dae {
 		AddPlane({ -5.f,  0.f,  0.f }, { 1.f,  0.f,  0.f }, matLambert_GrayBlue); //left
 
 		pBunny = AddTriangleMesh(TriangleCullMode::NoCulling, matLambert_White);
-		Utils::ParseOBJ("Resources/lowpoly_bunny.obj", pBunny->positions,
+		Utils::ParseOBJ("Resources/lowpoly_bunny2.obj", pBunny->positions,
 						pBunny->normals, pBunny->indices);
 
 		pBunny->Scale({ 2.f, 2.f, 2.f });
-		pBunny->Translate({ 0.f,1.f,0.f });
 
+		pBunny->UpdateAABB();
 		pBunny->UpdateTransforms();
 
 		//Light
